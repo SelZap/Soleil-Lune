@@ -15,84 +15,13 @@ $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
    <title>Soleil | Lune - Home</title>
 
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-   <link rel="stylesheet" href="/Soleil-Lune/assets/css/style.css">
+   <link rel="stylesheet" href="/Soleil-Lune/assets/css/public.css">
+   <link rel="stylesheet" href="/Soleil-Lune/assets/css/header.css">
    <link rel="icon" type="image/x-icon" href="/Soleil-Lune/assets/images/Soleil.ico">
 </head>
 <body>
    
 <?php include '../components/header.php'; ?>
-
-<section class="home-grid">
-
-   <div class="box-container">
-
-      <div class="box">
-         <?php if($user_id): ?>
-            <?php
-               $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
-               $stmt->execute([$user_id]);
-               $user = $stmt->fetch(PDO::FETCH_ASSOC);
-               
-               if($user){
-                  $stmt = $conn->prepare("SELECT COUNT(*) FROM comments WHERE user_id = ?");
-                  $stmt->execute([$user_id]);
-                  $comment_count = $stmt->fetchColumn();
-                  
-                  $stmt = $conn->prepare("SELECT COUNT(*) FROM likes WHERE user_id = ?");
-                  $stmt->execute([$user_id]);
-                  $like_count = $stmt->fetchColumn();
-            ?>
-            <p>welcome <span><?php echo htmlspecialchars($user['name']); ?></span></p>
-            <p>total comments : <span><?php echo $comment_count; ?></span></p>
-            <p>posts liked : <span><?php echo $like_count; ?></span></p>
-            <a href="/Soleil-Lune/public/profile.php" class="btn">update profile</a>
-            <div class="flex-btn">
-               <a href="/Soleil-Lune/public/profile.php?tab=likes" class="option-btn">likes</a>
-               <a href="/Soleil-Lune/public/profile.php?tab=comments" class="option-btn">comments</a>
-            </div>
-            <?php } ?>
-         <?php else: ?>
-            <p class="name">login or register!</p>
-            <div class="flex-btn">
-               <a href="/Soleil-Lune/public/auth.php?action=login" class="option-btn">login</a>
-               <a href="/Soleil-Lune/public/auth.php?action=register" class="option-btn">register</a>
-            </div> 
-         <?php endif; ?>
-      </div>
-
-      <div class="box">
-         <p>categories</p>
-         <div class="flex-box">
-            <a href="/Soleil-Lune/public/posts.php?category=travels" class="links">travels</a>
-            <a href="/Soleil-Lune/public/posts.php?category=education" class="links">education</a>
-            <a href="/Soleil-Lune/public/posts.php?category=fashion" class="links">fashion</a>
-            <a href="/Soleil-Lune/public/categories.php" class="btn">view all</a>
-         </div>
-      </div>
-
-      <div class="box">
-         <p>authors</p>
-         <div class="flex-box">
-         <?php
-            $stmt = $conn->prepare("SELECT DISTINCT name FROM admin LIMIT 5");
-            $stmt->execute();
-            if($stmt->rowCount() > 0){
-               while($author = $stmt->fetch(PDO::FETCH_ASSOC)){ 
-         ?>
-            <a href="/Soleil-Lune/public/posts.php?author=<?php echo urlencode($author['name']); ?>" class="links"><?php echo htmlspecialchars($author['name']); ?></a>
-         <?php
-               }
-            } else {
-               echo '<p class="empty">no authors found</p>';
-            }
-         ?>
-         <a href="/Soleil-Lune/public/authors.php" class="btn">view all</a>
-         </div>
-      </div>
-
-   </div>
-
-</section>
 
 <section class="posts-container">
 
