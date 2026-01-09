@@ -19,7 +19,9 @@ if (isset($_SESSION['message'])) {
 <header class="header">
    <section class="flex">
 
-      <a href="/Soleil-Lune/public/index.php" class="logo">Soleil|Lune</a>
+      <a href="/Soleil-Lune/public/index.php" class="logo">
+         <img src="/Soleil-Lune/assets/images/Soleil_logo.png" alt="Soleil|Lune">
+      </a>
 
       <form action="/Soleil-Lune/public/posts.php" method="GET" class="search-form">
          <input type="text" name="search" class="box" maxlength="100" placeholder="search for blogs" required>
@@ -42,7 +44,6 @@ if (isset($_SESSION['message'])) {
             <a href="/Soleil-Lune/public/auth.php?action=logout"> <i class="fas fa-angle-right"></i> logout</a>
          <?php else: ?>
             <a href="/Soleil-Lune/public/auth.php?action=login"> <i class="fas fa-angle-right"></i> login</a>
-            <a href="/Soleil-Lune/public/auth.php?action=register"> <i class="fas fa-angle-right"></i> register</a>
          <?php endif; ?>
       </nav>
 

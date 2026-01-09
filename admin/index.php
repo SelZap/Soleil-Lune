@@ -48,7 +48,7 @@ $like_count = $stmt->fetchColumn();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-    <link rel="stylesheet" href="/Soleil-Lune/assets/css/style.css">
+    <link rel="stylesheet" href="/Soleil-Lune/assets/css/public.css">
     <link rel="icon" type="image/x-icon" href="/Soleil-Lune/assets/images/Soleil.ico">
 </head>
 <body class="admin-page">

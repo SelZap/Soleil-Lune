@@ -58,7 +58,8 @@ if ($category && $category != 'all') {
    <title><?php echo $pageTitle; ?> - Soleil|Lune</title>
 
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-   <link rel="stylesheet" href="/Soleil-Lune/assets/css/style.css">
+   <link rel="stylesheet" href="/Soleil-Lune/assets/css/public.css">
+   <link rel="stylesheet" href="/Soleil-Lune/assets/css/header.css">
    <link rel="icon" type="image/x-icon" href="/Soleil-Lune/assets/images/Soleil.ico">
 </head>
 <body>
