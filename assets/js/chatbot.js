@@ -64,7 +64,21 @@ async function sendMessage(message = null) {
       typingDiv.remove();
 
       // Add bot response
-      addMessage(data.response, 'bot', data.button_text, data.button_link);
+addMessage(data.response, 'bot', data.button_text, data.button_link);
+
+// Show additional menu if help was requested
+if (userMessage.includes('help') || userMessage.includes('more topics')) {
+   setTimeout(() => {
+      addQuickReplies([
+         { text: '🏪 Business Account', value: 'business' },
+         { text: '📊 Trending Posts', value: 'trending' },
+         { text: '📤 Post Format', value: 'post format' },
+         { text: '🏷️ Categories', value: 'category' },
+         { text: '🚫 Block Users', value: 'block' },
+         { text: '📢 Report Content', value: 'report' }
+      ]);
+   }, 500);
+}
    } catch (error) {
       typingDiv.remove();
       addMessage('Sorry, I encountered an error: ' + error.message, 'bot');
@@ -123,15 +137,31 @@ function scrollToBottom() {
 function showGreeting() {
    addMessage("Bonjour! 👋 I'm Ami, your friendly Soleil|Lune assistant!\n\nHow can I help you today?", 'bot');
    
-   // Add quick reply menu
+   // Add main topic buttons
    setTimeout(() => {
       addQuickReplies([
-         { text: '✨ Account & Profile', value: 'account personalization' },
-         { text: '📝 Posting & Content', value: 'post rules' },
-         { text: '💬 Comments', value: 'comment rules' },
-         { text: '⚠️ Rules & Safety', value: 'rules broken' },
+         { text: '✨ Account & Profile', value: 'personalize' },
+         { text: '📝 Post Rules', value: 'post rules' },
+         { text: '💬 Comment Rules', value: 'comment rules' },
+         { text: '⚠️ Warnings & Bans', value: 'warnings' },
          { text: '🔍 Find People', value: 'find people' },
-         { text: '❓ Help', value: 'help' }
+         { text: '📋 More Topics', value: 'help' }
+      ]);
+   }, 500);
+}
+
+function showMoreTopics() {
+   addMessage("Here are more topics I can help with:", 'bot');
+   
+   setTimeout(() => {
+      addQuickReplies([
+         { text: '🏪 Business Account', value: 'business' },
+         { text: '📊 Trending Posts', value: 'trending' },
+         { text: '📤 Post Format', value: 'post format' },
+         { text: '🏷️ Categories', value: 'category' },
+         { text: '🚫 Blocking Users', value: 'block' },
+         { text: '📢 Report Content', value: 'report' },
+         { text: '🔙 Back to Main', value: 'help' }
       ]);
    }, 500);
 }

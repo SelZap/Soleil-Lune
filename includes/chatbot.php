@@ -19,53 +19,63 @@ try {
         exit;
     }
 
-    // Test database
-    $test = $conn->query("SELECT COUNT(*) FROM chatbot_intents");
-    $count = $test->fetchColumn();
-    
-    if ($count == 0) {
-        echo json_encode([
-            'response' => 'No chatbot data! Run SQL import.',
-            'button_text' => null,
-            'button_link' => null
-        ]);
-        exit;
-    }
-
-    // Find matching intent
+    // Find matching intent using better pattern matching
     $stmt = $conn->prepare("
-        SELECT ci.response, ci.button_text, ci.button_link, ci.tag, cp.pattern
-        FROM chatbot_patterns cp 
-        JOIN chatbot_intents ci ON cp.intent_id = ci.id 
-        ORDER BY ci.priority DESC
+        SELECT ci.id, ci.tag, ci.response, ci.button_text, ci.button_link, ci.priority
+        FROM chatbot_intents ci
     ");
     $stmt->execute();
-    $patterns = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $intents = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $result = null;
-    foreach ($patterns as $pattern) {
-        $keywords = explode('|', $pattern['pattern']);
-        foreach ($keywords as $keyword) {
-            if (strpos($message, trim($keyword)) !== false) {
-                $result = $pattern;
-                break 2;
+    $bestMatch = null;
+    $highestPriority = -1;
+
+    foreach ($intents as $intent) {
+        // Get patterns for this intent
+        $patternStmt = $conn->prepare("SELECT pattern FROM chatbot_patterns WHERE intent_id = ?");
+        $patternStmt->execute([$intent['id']]);
+        $patterns = $patternStmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // Check each pattern
+        foreach ($patterns as $pattern) {
+            $keywords = array_map('trim', explode('|', $pattern));
+            
+            foreach ($keywords as $keyword) {
+                // Check if message contains this keyword
+                if (stripos($message, $keyword) !== false) {
+                    // Higher priority wins
+                    if ($intent['priority'] > $highestPriority) {
+                        $bestMatch = $intent;
+                        $highestPriority = $intent['priority'];
+                    }
+                    break 2; // Found match, move to next intent
+                }
             }
         }
     }
 
-    if ($result) {
-        $response = $result['response'];
-        $buttonText = $result['button_text'];
-        $buttonLink = $result['button_link'];
-        $tag = $result['tag'];
+    if ($bestMatch) {
+        $response = $bestMatch['response'];
+        $buttonText = $bestMatch['button_text'];
+        $buttonLink = $bestMatch['button_link'];
+        $tag = $bestMatch['tag'];
     } else {
+        // Default response
         $stmt = $conn->prepare("SELECT response, button_text, button_link FROM chatbot_intents WHERE tag = 'default'");
         $stmt->execute();
         $default = $stmt->fetch(PDO::FETCH_ASSOC);
-        $response = $default['response'] ?? "I'm not sure about that!";
+        $response = $default['response'] ?? "I'm not sure about that! Type 'help' to see what I can do.";
         $buttonText = $default['button_text'] ?? null;
         $buttonLink = $default['button_link'] ?? null;
         $tag = 'default';
+    }
+
+    // Log conversation
+    try {
+        $logStmt = $conn->prepare("INSERT INTO chatbot_conversations (user_id, session_id, user_message, bot_response, intent_tag) VALUES (?, ?, ?, ?, ?)");
+        $logStmt->execute([$userId, $sessionId, $message, $response, $tag]);
+    } catch (Exception $e) {
+        // Continue if logging fails
     }
 
     echo json_encode([
