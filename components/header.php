@@ -31,6 +31,7 @@ if (isset($_SESSION['message'])) {
       <div class="icons">
          <div id="menu-btn" class="fas fa-bars"></div>
          <div id="search-btn" class="fas fa-search"></div>
+         <div id="chatbot-btn" class="fas fa-comments"></div>
          <div id="user-btn" class="fas fa-user"></div>
       </div>
 
@@ -69,5 +70,27 @@ if (isset($_SESSION['message'])) {
       </div>
 
    </section>
-
 </header>
+
+<!-- Chatbot (placed AFTER header closes) -->
+<div class="chatbot-overlay"></div>
+<div class="chatbot-window">
+   <div class="chatbot-header">
+      <div class="chatbot-header-info">
+         <div class="chatbot-avatar">🌙</div>
+         <div>
+            <h3>Ami</h3>
+            <p>Online • Ready to help!</p>
+         </div>
+      </div>
+      <button class="chatbot-close"><i class="fas fa-times"></i></button>
+   </div>
+   <div class="chatbot-messages"></div>
+   <div class="chatbot-input-area">
+      <input type="text" class="chatbot-input" placeholder="Type your message...">
+      <button class="chatbot-send"><i class="fas fa-paper-plane"></i></button>
+   </div>
+</div>
+
+<link rel="stylesheet" href="/Soleil-Lune/assets/css/chatbot.css">
+<script src="/Soleil-Lune/assets/js/chatbot.js"></script>
