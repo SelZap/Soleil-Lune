@@ -60,7 +60,7 @@ async function initializeChat() {
       removeTypingIndicator();
       
       if (data.success) {
-         addBotMessage(data.message, data.buttons);
+         addBotMessage(data.message, data.buttons, null, false);
       }
    }, 2000);
 }
@@ -97,7 +97,7 @@ async function sendMessage(message = null) {
 
          // Add bot response
          if (data.success) {
-            addBotMessage(data.message, data.buttons, data.button);
+            addBotMessage(data.message, data.buttons, data.button, false);
          }
       } catch (error) {
          removeTypingIndicator();
@@ -108,7 +108,12 @@ async function sendMessage(message = null) {
 }
 
 // Select menu option
-async function selectMenu(menuId) {
+async function selectMenu(menuId, buttonText) {
+   // Add user message showing what they selected
+   if (buttonText) {
+      addMessage(buttonText, 'user');
+   }
+   
    showTypingIndicator();
    
    setTimeout(async () => {
@@ -122,7 +127,9 @@ async function selectMenu(menuId) {
       removeTypingIndicator();
       
       if (data.success) {
-         addBotMessage(data.message, data.buttons, null, true, menuId);
+         // Check if this is a submenu (has more options) or final answer
+         const hasSubOptions = data.buttons && data.buttons.length > 0 && !data.buttons[0].action;
+         addBotMessage(data.message, data.buttons, null, hasSubOptions, menuId);
       }
    }, 2000);
 }
@@ -134,7 +141,7 @@ function addMessage(text, sender) {
    messageDiv.style.transform = 'translateY(10px)';
    messageDiv.style.transition = 'all 0.3s ease';
    
-   messageDiv.innerHTML = `<div class="message-content">${text}</div>`;
+   messageDiv.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
    chatbotMessages.appendChild(messageDiv);
    
    // Animate message in
@@ -157,7 +164,8 @@ function addBotMessage(text, buttons = [], actionButton = null, showActions = fa
          if (btn.action === 'init') {
             // Skip - we'll handle back button in action buttons
          } else if (btn.id) {
-            buttonsHtml += `<button class="quick-reply-btn" onclick="selectMenu(${btn.id})">${escapeHtml(btn.text)}</button>`;
+            // Pass button text to selectMenu function
+            buttonsHtml += `<button class="quick-reply-btn" onclick="selectMenu(${btn.id}, '${escapeHtml(btn.text).replace(/'/g, "\\'")}')">${escapeHtml(btn.text)}</button>`;
          }
       });
       buttonsHtml += '</div>';
@@ -167,15 +175,24 @@ function addBotMessage(text, buttons = [], actionButton = null, showActions = fa
       buttonsHtml += `<div class="quick-replies" style="margin-top: 8px;"><a href="${actionButton.link}" class="message-button" target="_blank">${escapeHtml(actionButton.text)}</a></div>`;
    }
    
-   // Add action buttons after menu selection
+   // Add action buttons ONLY if user has selected a submenu option
    if (showActions && menuId) {
       buttonsHtml += `
          <div class="action-buttons">
             <button class="action-btn back-btn" onclick="initializeChat()">
-               <span>←</span> Back to Menu
+               ← Back to Menu
             </button>
             <button class="action-btn ask-again-btn" onclick="selectMenu(${menuId})">
-               Ask Again
+               🔄 Ask Again
+            </button>
+         </div>
+      `;
+   } else if (menuId) {
+      // Just show Back to Menu button for main menu items
+      buttonsHtml += `
+         <div class="action-buttons">
+            <button class="action-btn back-btn" onclick="initializeChat()">
+               ← Back to Menu
             </button>
          </div>
       `;
