@@ -14,7 +14,7 @@ chatbotBtn.addEventListener('click', () => {
    
    if (chatbotMessages.children.length === 0) {
       setTimeout(() => {
-         showGreeting();
+         initializeChat();
       }, 300);
    }
 });
@@ -28,6 +28,20 @@ chatbotOverlay.addEventListener('click', () => {
    chatbotWindow.classList.remove('active');
    chatbotOverlay.classList.remove('active');
 });
+
+// Initialize chat
+async function initializeChat() {
+   const response = await fetch('/Soleil-Lune/api/chatbot.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'action=init'
+   });
+   
+   const data = await response.json();
+   if (data.success) {
+      addBotMessage(data.message, data.buttons);
+   }
+}
 
 // Send message (typed or clicked)
 async function sendMessage(message = null) {
@@ -46,12 +60,12 @@ async function sendMessage(message = null) {
    
    setTimeout(() => scrollToBottom(), 50);
 
-   // Send to server - FIXED PATH
+   // Send to server
    try {
-      const response = await fetch(window.location.origin + '/Soleil-Lune/includes/chatbot.php', {
+      const response = await fetch('/Soleil-Lune/api/chatbot.php', {
          method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ message: userMessage })
+         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+         body: `action=message&message=${encodeURIComponent(userMessage)}`
       });
 
       if (!response.ok) {
@@ -64,7 +78,9 @@ async function sendMessage(message = null) {
       typingDiv.remove();
 
       // Add bot response
-      addMessage(data.response, 'bot', data.button_text, data.button_link);
+      if (data.success) {
+         addBotMessage(data.message, data.buttons, data.button);
+      }
    } catch (error) {
       typingDiv.remove();
       addMessage('Sorry, I encountered an error: ' + error.message, 'bot');
@@ -72,20 +88,28 @@ async function sendMessage(message = null) {
    }
 }
 
-function addMessage(text, sender, buttonText = null, buttonLink = null) {
+// Select menu option
+async function selectMenu(menuId) {
+   const response = await fetch('/Soleil-Lune/api/chatbot.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `action=menu&menu_id=${menuId}`
+   });
+   
+   const data = await response.json();
+   if (data.success) {
+      addBotMessage(data.message, data.buttons);
+   }
+}
+
+function addMessage(text, sender) {
    const messageDiv = document.createElement('div');
    messageDiv.className = `message ${sender}`;
    messageDiv.style.opacity = '0';
    messageDiv.style.transform = 'translateY(10px)';
    messageDiv.style.transition = 'all 0.3s ease';
    
-   let html = `<div class="message-content">${text}</div>`;
-   
-   if (buttonText && buttonLink) {
-      html += `<a href="${buttonLink}" class="message-button">${buttonText}</a>`;
-   }
-   
-   messageDiv.innerHTML = html;
+   messageDiv.innerHTML = `<div class="message-content">${text}</div>`;
    chatbotMessages.appendChild(messageDiv);
    
    // Animate message in
@@ -97,43 +121,41 @@ function addMessage(text, sender, buttonText = null, buttonLink = null) {
    setTimeout(() => scrollToBottom(), 100);
 }
 
-function addQuickReplies(options) {
-   const quickReplyDiv = document.createElement('div');
-   quickReplyDiv.className = 'quick-replies';
+function addBotMessage(text, buttons = [], actionButton = null) {
+   const messageDiv = document.createElement('div');
+   messageDiv.className = 'message bot';
    
-   options.forEach(option => {
-      const btn = document.createElement('button');
-      btn.className = 'quick-reply-btn';
-      btn.textContent = option.text;
-      btn.onclick = () => {
-         quickReplyDiv.remove();
-         sendMessage(option.value);
-      };
-      quickReplyDiv.appendChild(btn);
-   });
+   let buttonsHtml = '';
+   if (buttons && buttons.length > 0) {
+      buttonsHtml = '<div class="quick-replies">';
+      buttons.forEach(btn => {
+         if (btn.action === 'init') {
+            buttonsHtml += `<button class="quick-reply-btn" onclick="initializeChat()">${escapeHtml(btn.text)}</button>`;
+         } else if (btn.id) {
+            buttonsHtml += `<button class="quick-reply-btn" onclick="selectMenu(${btn.id})">${escapeHtml(btn.text)}</button>`;
+         }
+      });
+      buttonsHtml += '</div>';
+   }
    
-   chatbotMessages.appendChild(quickReplyDiv);
+   if (actionButton) {
+      buttonsHtml += `<div class="quick-replies" style="margin-top: 8px;"><a href="${actionButton.link}" class="message-button" target="_blank">${escapeHtml(actionButton.text)}</a></div>`;
+   }
+   
+   messageDiv.innerHTML = `<div class="message-content">${escapeHtml(text).replace(/\n/g, '<br>')}</div>${buttonsHtml}`;
+   chatbotMessages.appendChild(messageDiv);
+   
    setTimeout(() => scrollToBottom(), 100);
+}
+
+function escapeHtml(text) {
+   const div = document.createElement('div');
+   div.textContent = text;
+   return div.innerHTML;
 }
 
 function scrollToBottom() {
    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-}
-
-function showGreeting() {
-   addMessage("Bonjour! 👋 I'm Ami, your friendly Soleil|Lune assistant!\n\nHow can I help you today?", 'bot');
-   
-   // Add quick reply menu
-   setTimeout(() => {
-      addQuickReplies([
-         { text: '✨ Account & Profile', value: 'account personalization' },
-         { text: '📝 Posting & Content', value: 'post rules' },
-         { text: '💬 Comments', value: 'comment rules' },
-         { text: '⚠️ Rules & Safety', value: 'rules broken' },
-         { text: '🔍 Find People', value: 'find people' },
-         { text: '❓ Help', value: 'help' }
-      ]);
-   }, 500);
 }
 
 chatbotSend.addEventListener('click', () => sendMessage());
