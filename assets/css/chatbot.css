@@ -115,6 +115,14 @@
    background: transparent !important;
    border: none !important;
    padding: 0 !important;
+   opacity: 0;
+   transform: translateY(20px) scale(0.95);
+   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.message.show {
+   opacity: 1;
+   transform: translateY(0) scale(1);
 }
 
 .message.user {
@@ -301,46 +309,7 @@
    box-shadow: 0 .5rem 1rem rgba(0,0,0,.1);
 }
 
-/* Typing indicator - ADD AT END */
-.typing-indicator {
-   display: flex;
-   gap: .5rem;
-   padding: 1.2rem 1.8rem;
-   background: var(--white);
-   border: var(--border);
-   border-radius: 1.5rem;
-   border-bottom-left-radius: .5rem;
-   max-width: 6rem;
-}
-
-.typing-indicator span {
-   width: .8rem;
-   height: .8rem;
-   background: var(--main-color);
-   border-radius: 50%;
-   animation: typing 1.4s infinite;
-}
-
-.typing-indicator span:nth-child(2) {
-   animation-delay: 0.2s;
-}
-
-.typing-indicator span:nth-child(3) {
-   animation-delay: 0.4s;
-}
-
-@keyframes typing {
-   0%, 60%, 100% {
-      transform: translateY(0);
-   }
-   30% {
-      transform: translateY(-.8rem);
-   }
-}
-
-/* Action buttons - ADD AT END */
 /* Action buttons styling */
-/* Action buttons styling - REPLACE ENTIRE SECTION */
 .action-buttons {
    display: flex;
    gap: 1rem;
@@ -349,20 +318,20 @@
 }
 
 .action-btn {
-   padding: 1rem 1.5rem;  /* REDUCED from 1.2rem 2rem */
+   padding: 1rem 1.5rem;
    background: linear-gradient(135deg, var(--main-color), var(--orange));
    color: var(--white);
    border: none;
-   border-radius: 2rem;  /* REDUCED from 2.5rem */
-   font-size: 1.3rem;  /* REDUCED from 1.4rem */
+   border-radius: 2rem;
+   font-size: 1.3rem;
    cursor: pointer;
    transition: all 0.3s;
    font-weight: 600;
    flex: 1;
-   min-width: 120px;  /* REDUCED from 45% */
-   max-width: 200px;  /* ADDED max width */
+   min-width: 120px;
+   max-width: 200px;
    box-shadow: 0 .3rem .8rem rgba(79, 73, 63, 0.2);
-   display: inline-flex;  /* CHANGED from flex */
+   display: inline-flex;
    align-items: center;
    justify-content: center;
    gap: .5rem;
@@ -410,25 +379,4 @@
       min-width: 100%;
       max-width: 100%;
    }
-}
-
-/* Back to menu standalone style - ADD AT END */
-.back-menu-standalone {
-   padding: 1.2rem 2.5rem;
-   background: transparent;
-   color: #6c757d;
-   border: 2px solid #6c757d;
-   border-radius: 2.5rem;
-   font-size: 1.4rem;
-   cursor: pointer;
-   transition: all 0.3s;
-   font-weight: 600;
-   margin-top: 1rem;
-   display: inline-block;
-}
-
-.back-menu-standalone:hover {
-   background: #6c757d;
-   color: var(--white);
-   transform: translateY(-.2rem);
 }

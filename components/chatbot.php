@@ -256,7 +256,7 @@
                 <div class="chatbot-avatar">🌙</div>
                 <div>
                     <div class="chatbot-title">Ami</div>
-                    <div class="chatbot-status">Online • Ready to help!</div>
+                    <div class="chatbot-status">Ready to help!</div>
                 </div>
             </div>
             <button class="chatbot-close" id="chatbotClose">×</button>
