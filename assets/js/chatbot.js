@@ -29,18 +29,40 @@ chatbotOverlay.addEventListener('click', () => {
    chatbotOverlay.classList.remove('active');
 });
 
+// Show typing indicator
+function showTypingIndicator() {
+   const typingDiv = document.createElement('div');
+   typingDiv.className = 'message bot';
+   typingDiv.id = 'typing-indicator';
+   typingDiv.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+   chatbotMessages.appendChild(typingDiv);
+   scrollToBottom();
+}
+
+// Remove typing indicator
+function removeTypingIndicator() {
+   const typing = document.getElementById('typing-indicator');
+   if (typing) typing.remove();
+}
+
 // Initialize chat
 async function initializeChat() {
-   const response = await fetch('/Soleil-Lune/api/chatbot.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'action=init'
-   });
+   showTypingIndicator();
    
-   const data = await response.json();
-   if (data.success) {
-      addBotMessage(data.message, data.buttons);
-   }
+   setTimeout(async () => {
+      const response = await fetch('/Soleil-Lune/api/chatbot.php', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+         body: 'action=init'
+      });
+      
+      const data = await response.json();
+      removeTypingIndicator();
+      
+      if (data.success) {
+         addBotMessage(data.message, data.buttons);
+      }
+   }, 2000);
 }
 
 // Send message (typed or clicked)
@@ -53,53 +75,56 @@ async function sendMessage(message = null) {
    chatbotInput.value = '';
 
    // Show typing indicator
-   const typingDiv = document.createElement('div');
-   typingDiv.className = 'message bot';
-   typingDiv.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
-   chatbotMessages.appendChild(typingDiv);
-   
-   setTimeout(() => scrollToBottom(), 50);
+   showTypingIndicator();
 
    // Send to server
-   try {
-      const response = await fetch('/Soleil-Lune/api/chatbot.php', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-         body: `action=message&message=${encodeURIComponent(userMessage)}`
-      });
+   setTimeout(async () => {
+      try {
+         const response = await fetch('/Soleil-Lune/api/chatbot.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `action=message&message=${encodeURIComponent(userMessage)}`
+         });
 
-      if (!response.ok) {
-         throw new Error('HTTP error! status: ' + response.status);
+         if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
+         }
+
+         const data = await response.json();
+         
+         // Remove typing indicator
+         removeTypingIndicator();
+
+         // Add bot response
+         if (data.success) {
+            addBotMessage(data.message, data.buttons, data.button);
+         }
+      } catch (error) {
+         removeTypingIndicator();
+         addMessage('Sorry, I encountered an error: ' + error.message, 'bot');
+         console.error('Chatbot error:', error);
       }
-
-      const data = await response.json();
-      
-      // Remove typing indicator
-      typingDiv.remove();
-
-      // Add bot response
-      if (data.success) {
-         addBotMessage(data.message, data.buttons, data.button);
-      }
-   } catch (error) {
-      typingDiv.remove();
-      addMessage('Sorry, I encountered an error: ' + error.message, 'bot');
-      console.error('Chatbot error:', error);
-   }
+   }, 2000);
 }
 
 // Select menu option
 async function selectMenu(menuId) {
-   const response = await fetch('/Soleil-Lune/api/chatbot.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `action=menu&menu_id=${menuId}`
-   });
+   showTypingIndicator();
    
-   const data = await response.json();
-   if (data.success) {
-      addBotMessage(data.message, data.buttons);
-   }
+   setTimeout(async () => {
+      const response = await fetch('/Soleil-Lune/api/chatbot.php', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+         body: `action=menu&menu_id=${menuId}`
+      });
+      
+      const data = await response.json();
+      removeTypingIndicator();
+      
+      if (data.success) {
+         addBotMessage(data.message, data.buttons, null, true, menuId);
+      }
+   }, 2000);
 }
 
 function addMessage(text, sender) {
@@ -121,7 +146,7 @@ function addMessage(text, sender) {
    setTimeout(() => scrollToBottom(), 100);
 }
 
-function addBotMessage(text, buttons = [], actionButton = null) {
+function addBotMessage(text, buttons = [], actionButton = null, showActions = false, menuId = null) {
    const messageDiv = document.createElement('div');
    messageDiv.className = 'message bot';
    
@@ -130,7 +155,7 @@ function addBotMessage(text, buttons = [], actionButton = null) {
       buttonsHtml = '<div class="quick-replies">';
       buttons.forEach(btn => {
          if (btn.action === 'init') {
-            buttonsHtml += `<button class="quick-reply-btn" onclick="initializeChat()">${escapeHtml(btn.text)}</button>`;
+            // Skip - we'll handle back button in action buttons
          } else if (btn.id) {
             buttonsHtml += `<button class="quick-reply-btn" onclick="selectMenu(${btn.id})">${escapeHtml(btn.text)}</button>`;
          }
@@ -140,6 +165,20 @@ function addBotMessage(text, buttons = [], actionButton = null) {
    
    if (actionButton) {
       buttonsHtml += `<div class="quick-replies" style="margin-top: 8px;"><a href="${actionButton.link}" class="message-button" target="_blank">${escapeHtml(actionButton.text)}</a></div>`;
+   }
+   
+   // Add action buttons after menu selection
+   if (showActions && menuId) {
+      buttonsHtml += `
+         <div class="action-buttons">
+            <button class="action-btn back-btn" onclick="initializeChat()">
+               <span>←</span> Back to Menu
+            </button>
+            <button class="action-btn ask-again-btn" onclick="selectMenu(${menuId})">
+               Ask Again
+            </button>
+         </div>
+      `;
    }
    
    messageDiv.innerHTML = `<div class="message-content">${escapeHtml(text).replace(/\n/g, '<br>')}</div>${buttonsHtml}`;

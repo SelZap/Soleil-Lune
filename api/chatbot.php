@@ -101,7 +101,8 @@ if ($action === 'menu' && $menuId) {
             $response = [
                 'success' => true,
                 'message' => $menu['response_text'],
-                'buttons' => []
+                'buttons' => [],
+                'menu_id' => $menuId
             ];
             
             // If has children, get submenu
@@ -117,13 +118,6 @@ if ($action === 'menu' && $menuId) {
             } else if ($menu['link_url']) {
                 $response['link'] = $menu['link_url'];
             }
-            
-            // Add back button
-            $response['buttons'][] = [
-                'id' => 'back',
-                'text' => '⬅️ Back to Menu',
-                'action' => 'init'
-            ];
             
             saveConversation($conn, $userId, $sessionId, '[MENU:' . $menu['button_text'] . ']', $menu['response_text'], 'menu');
             
