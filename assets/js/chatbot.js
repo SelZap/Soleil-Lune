@@ -45,8 +45,15 @@ function removeTypingIndicator() {
    if (typing) typing.remove();
 }
 
-// Initialize chat
+// Remove all buttons from previous messages
+function removeAllButtons() {
+   document.querySelectorAll('.quick-replies, .action-buttons').forEach(el => el.remove());
+}
+
+// Initialize chat (back to main menu)
 async function initializeChat() {
+   // Don't clear messages, just remove buttons
+   removeAllButtons();
    showTypingIndicator();
    
    setTimeout(async () => {
@@ -60,9 +67,9 @@ async function initializeChat() {
       removeTypingIndicator();
       
       if (data.success) {
-         addBotMessage(data.message, data.buttons, null, false);
+         addBotMessage(data.message, data.buttons);
       }
-   }, 2000);
+   }, 1500);
 }
 
 // Send message (typed or clicked)
@@ -70,14 +77,11 @@ async function sendMessage(message = null) {
    const userMessage = message || chatbotInput.value.trim();
    if (!userMessage) return;
 
-   // Add user message
    addMessage(userMessage, 'user');
    chatbotInput.value = '';
-
-   // Show typing indicator
+   removeAllButtons();
    showTypingIndicator();
 
-   // Send to server
    setTimeout(async () => {
       try {
          const response = await fetch('/Soleil-Lune/api/chatbot.php', {
@@ -91,115 +95,102 @@ async function sendMessage(message = null) {
          }
 
          const data = await response.json();
-         
-         // Remove typing indicator
          removeTypingIndicator();
 
-         // Add bot response
          if (data.success) {
-            addBotMessage(data.message, data.buttons, data.button, false);
+            addBotMessage(data.message, data.buttons, data.button);
          }
       } catch (error) {
          removeTypingIndicator();
          addMessage('Sorry, I encountered an error: ' + error.message, 'bot');
          console.error('Chatbot error:', error);
       }
-   }, 2000);
+   }, 1500);
 }
 
 // Select menu option
-async function selectMenu(menuId, buttonText) {
-   // Add user message showing what they selected
-   if (buttonText) {
+async function selectMenu(menuId, buttonText, isAskAgain = false) {
+   if (buttonText && !isAskAgain) {
       addMessage(buttonText, 'user');
    }
    
+   removeAllButtons();
    showTypingIndicator();
    
    setTimeout(async () => {
       const response = await fetch('/Soleil-Lune/api/chatbot.php', {
          method: 'POST',
          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-         body: `action=menu&menu_id=${menuId}`
+         body: `action=menu&menu_id=${menuId}&is_ask_again=${isAskAgain ? '1' : '0'}`
       });
       
       const data = await response.json();
       removeTypingIndicator();
       
       if (data.success) {
-         // Check if this is a submenu (has more options) or final answer
-         const hasSubOptions = data.buttons && data.buttons.length > 0 && !data.buttons[0].action;
-         addBotMessage(data.message, data.buttons, null, hasSubOptions, menuId);
+         // Check if has children buttons
+         const hasChildren = data.buttons && data.buttons.length > 0;
+         addBotMessage(data.message, data.buttons, null, menuId, !hasChildren, data.parent_id);
       }
-   }, 2000);
+   }, 1500);
 }
 
 function addMessage(text, sender) {
    const messageDiv = document.createElement('div');
    messageDiv.className = `message ${sender}`;
-   messageDiv.style.opacity = '0';
-   messageDiv.style.transform = 'translateY(10px)';
-   messageDiv.style.transition = 'all 0.3s ease';
-   
    messageDiv.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
    chatbotMessages.appendChild(messageDiv);
    
-   // Animate message in
+   // Trigger animation
    setTimeout(() => {
-      messageDiv.style.opacity = '1';
-      messageDiv.style.transform = 'translateY(0)';
+      messageDiv.classList.add('show');
    }, 10);
    
    setTimeout(() => scrollToBottom(), 100);
 }
 
-function addBotMessage(text, buttons = [], actionButton = null, showActions = false, menuId = null) {
+function addBotMessage(text, buttons = [], actionButton = null, menuId = null, showAskAgain = false, parentId = null) {
    const messageDiv = document.createElement('div');
    messageDiv.className = 'message bot';
    
    let buttonsHtml = '';
+   
+   // Quick reply buttons
    if (buttons && buttons.length > 0) {
       buttonsHtml = '<div class="quick-replies">';
       buttons.forEach(btn => {
-         if (btn.action === 'init') {
-            // Skip - we'll handle back button in action buttons
-         } else if (btn.id) {
-            // Pass button text to selectMenu function
+         if (btn.id) {
             buttonsHtml += `<button class="quick-reply-btn" onclick="selectMenu(${btn.id}, '${escapeHtml(btn.text).replace(/'/g, "\\'")}')">${escapeHtml(btn.text)}</button>`;
          }
       });
       buttonsHtml += '</div>';
    }
    
+   // External link button
    if (actionButton) {
       buttonsHtml += `<div class="quick-replies" style="margin-top: 8px;"><a href="${actionButton.link}" class="message-button" target="_blank">${escapeHtml(actionButton.text)}</a></div>`;
    }
    
-   // Add action buttons ONLY if user has selected a submenu option
-   if (showActions && menuId) {
-      buttonsHtml += `
-         <div class="action-buttons">
-            <button class="action-btn back-btn" onclick="initializeChat()">
-               ← Back to Menu
-            </button>
-            <button class="action-btn ask-again-btn" onclick="selectMenu(${menuId})">
-               🔄 Ask Again
-            </button>
-         </div>
-      `;
-   } else if (menuId) {
-      // Just show Back to Menu button for main menu items
-      buttonsHtml += `
-         <div class="action-buttons">
-            <button class="action-btn back-btn" onclick="initializeChat()">
-               ← Back to Menu
-            </button>
-         </div>
-      `;
+   // Action buttons - only show "Ask Again" for leaf nodes (final answers)
+   if (menuId) {
+      buttonsHtml += '<div class="action-buttons">';
+      buttonsHtml += `<button class="action-btn back-btn" onclick="initializeChat()">← Back to Menu</button>`;
+      
+      // "Ask Again" brings back the parent menu's options
+      if (showAskAgain && parentId) {
+         buttonsHtml += `<button class="action-btn ask-again-btn" onclick="selectMenu(${parentId}, null, true)">🔄 Ask Again</button>`;
+      }
+      
+      buttonsHtml += '</div>';
    }
    
    messageDiv.innerHTML = `<div class="message-content">${escapeHtml(text).replace(/\n/g, '<br>')}</div>${buttonsHtml}`;
    chatbotMessages.appendChild(messageDiv);
+   
+   // Trigger animation
+   setTimeout(() => {
+      messageDiv.classList.add('show');
+   }, 10);
    
    setTimeout(() => scrollToBottom(), 100);
 }

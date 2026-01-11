@@ -8,7 +8,6 @@ $action = $_POST['action'] ?? '';
 $message = $_POST['message'] ?? '';
 $menuId = isset($_POST['menu_id']) ? intval($_POST['menu_id']) : null;
 
-// Generate or get session ID
 if (!isset($_SESSION['chatbot_session'])) {
     $_SESSION['chatbot_session'] = uniqid('chat_', true);
 }
@@ -28,20 +27,16 @@ function getSubmenu($conn, $parentId) {
 }
 
 function matchRuleQuery($conn, $message) {
-    // Get all rules
     $stmt = $conn->prepare("SELECT * FROM chatbot_rules ORDER BY priority DESC");
     $stmt->execute();
     $rules = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Normalize message
     $message = strtolower(trim($message));
     
-    // Try to match each rule
     foreach ($rules as $rule) {
         $keywords = explode('|', strtolower($rule['keywords']));
         foreach ($keywords as $keyword) {
             $keyword = trim($keyword);
-            // Check if keyword is in message
             if (strpos($message, $keyword) !== false) {
                 return $rule;
             }
@@ -56,7 +51,6 @@ function saveConversation($conn, $userId, $sessionId, $userMessage, $botResponse
         $stmt = $conn->prepare("INSERT INTO chatbot_conversations (user_id, session_id, user_message, bot_response, response_type) VALUES (?, ?, ?, ?, ?)");
         $stmt->execute([$userId, $sessionId, $userMessage, $botResponse, $responseType]);
     } catch (Exception $e) {
-        // Log but don't fail
         error_log("Chatbot conversation save error: " . $e->getMessage());
     }
 }
@@ -68,7 +62,7 @@ if ($action === 'init') {
         
         $response = [
             'success' => true,
-            'message' => "Bonjour! 👋 I'm Ami, your friendly Soleil|Lune assistant!\n\nHow can I help you today?",
+            'message' => "Bonjour! I'm Ami, your friendly Soleil|Lune assistant!\n\nHow can I help you today?",
             'buttons' => array_map(function($item) {
                 return [
                     'id' => $item['id'],
@@ -79,13 +73,9 @@ if ($action === 'init') {
         ];
         
         saveConversation($conn, $userId, $sessionId, '[INIT]', $response['message'], 'menu');
-        
         echo json_encode($response);
     } catch (Exception $e) {
-        echo json_encode([
-            'success' => false, 
-            'message' => 'Error initializing chat: ' . $e->getMessage()
-        ]);
+        echo json_encode(['success' => false, 'message' => 'Error initializing chat: ' . $e->getMessage()]);
     }
     exit;
 }
@@ -93,6 +83,8 @@ if ($action === 'init') {
 // Handle menu selection
 if ($action === 'menu' && $menuId) {
     try {
+        $isAskAgain = isset($_POST['is_ask_again']) && $_POST['is_ask_again'] === '1';
+        
         $stmt = $conn->prepare("SELECT * FROM chatbot_menu WHERE id = ?");
         $stmt->execute([$menuId]);
         $menu = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -102,10 +94,42 @@ if ($action === 'menu' && $menuId) {
                 'success' => true,
                 'message' => $menu['response_text'],
                 'buttons' => [],
-                'menu_id' => $menuId
+                'menu_id' => $menuId,
+                'parent_id' => $menu['parent_id']
             ];
             
-            // If has children, get submenu
+            // If "Ask Again" - return to parent with its children
+            if ($isAskAgain && $menu['parent_id']) {
+                // Get the parent menu
+                $parentStmt = $conn->prepare("SELECT * FROM chatbot_menu WHERE id = ?");
+                $parentStmt->execute([$menu['parent_id']]);
+                $parentMenu = $parentStmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($parentMenu && $parentMenu['has_children']) {
+                    // Get parent's submenu options
+                    $submenu = getSubmenu($conn, $menu['parent_id']);
+                    
+                    $response = [
+                        'success' => true,
+                        'message' => $parentMenu['response_text'], // Show parent message
+                        'buttons' => array_map(function($item) {
+                            return [
+                                'id' => $item['id'],
+                                'text' => $item['button_text'],
+                                'link' => $item['link_url']
+                            ];
+                        }, $submenu),
+                        'menu_id' => $menu['parent_id'],
+                        'parent_id' => $parentMenu['parent_id']
+                    ];
+                    
+                    saveConversation($conn, $userId, $sessionId, '[ASK_AGAIN]', $parentMenu['response_text'], 'menu');
+                    echo json_encode($response);
+                    exit;
+                }
+            }
+            
+            // Normal selection - if has children, get submenu
             if ($menu['has_children']) {
                 $submenu = getSubmenu($conn, $menuId);
                 $response['buttons'] = array_map(function($item) {
@@ -120,16 +144,12 @@ if ($action === 'menu' && $menuId) {
             }
             
             saveConversation($conn, $userId, $sessionId, '[MENU:' . $menu['button_text'] . ']', $menu['response_text'], 'menu');
-            
             echo json_encode($response);
         } else {
             echo json_encode(['success' => false, 'message' => 'Menu not found']);
         }
     } catch (Exception $e) {
-        echo json_encode([
-            'success' => false, 
-            'message' => 'Error loading menu: ' . $e->getMessage()
-        ]);
+        echo json_encode(['success' => false, 'message' => 'Error loading menu: ' . $e->getMessage()]);
     }
     exit;
 }
@@ -137,11 +157,6 @@ if ($action === 'menu' && $menuId) {
 // Handle text message
 if ($action === 'message' && $message) {
     try {
-        // Debug: Check if rules table exists and has data
-        $checkStmt = $conn->query("SELECT COUNT(*) as count FROM chatbot_rules");
-        $ruleCount = $checkStmt->fetch(PDO::FETCH_ASSOC)['count'];
-        
-        // Try to match with rule-based query
         $rule = matchRuleQuery($conn, $message);
         
         if ($rule) {
@@ -151,7 +166,6 @@ if ($action === 'message' && $message) {
                 'buttons' => []
             ];
             
-            // Add button if available
             if ($rule['button_text'] && $rule['button_link']) {
                 $response['button'] = [
                     'text' => $rule['button_text'],
@@ -159,7 +173,6 @@ if ($action === 'message' && $message) {
                 ];
             }
             
-            // If rule has menu_id, offer related submenu
             if ($rule['menu_id']) {
                 $submenu = getSubmenu($conn, $rule['menu_id']);
                 if (!empty($submenu)) {
@@ -169,47 +182,32 @@ if ($action === 'message' && $message) {
                             'text' => $item['button_text'],
                             'link' => $item['link_url']
                         ];
-                    }, array_slice($submenu, 0, 3)); // Show max 3 related buttons
+                    }, array_slice($submenu, 0, 3));
                 }
             }
             
             saveConversation($conn, $userId, $sessionId, $message, $rule['response_text'], 'rule');
-            
             echo json_encode($response);
         } else {
-            // Default response - also show main menu
             $mainMenu = getMainMenu($conn);
             
             $response = [
                 'success' => true,
-                'message' => "Hmm, I'm not quite sure about that! 🤔 Could you rephrase your question?\n\nOr select a topic below:",
+                'message' => "Hmm, I'm not quite sure about that! Could you rephrase your question?\n\nOr select a topic below:",
                 'buttons' => array_map(function($item) {
                     return [
                         'id' => $item['id'],
                         'text' => $item['button_text'],
                         'has_children' => (bool)$item['has_children']
                     ];
-                }, array_slice($mainMenu, 0, 4)), // Show first 4 main options
-                'debug' => [
-                    'message' => $message,
-                    'rule_count' => $ruleCount,
-                    'matched' => false
-                ]
+                }, array_slice($mainMenu, 0, 4))
             ];
             
             saveConversation($conn, $userId, $sessionId, $message, $response['message'], 'default');
-            
             echo json_encode($response);
         }
     } catch (Exception $e) {
-        echo json_encode([
-            'success' => false, 
-            'message' => 'Error processing message: ' . $e->getMessage(),
-            'debug' => [
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ]
-        ]);
+        echo json_encode(['success' => false, 'message' => 'Error processing message: ' . $e->getMessage()]);
     }
     exit;
 }
