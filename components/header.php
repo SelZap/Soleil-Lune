@@ -14,7 +14,9 @@ if (isset($_SESSION['message'])) {
     unset($_SESSION['message']);
     unset($_SESSION['message_type']);
 }
+// COMMENT FOR DEMONSTRATION PURPOSES ONLY
 ?>
+
 
 <header class="header">
    <section class="flex">
@@ -94,3 +96,4 @@ if (isset($_SESSION['message'])) {
 
 <link rel="stylesheet" href="/Soleil-Lune/assets/css/chatbot.css">
 <script src="/Soleil-Lune/assets/js/chatbot.js"></script>
+
