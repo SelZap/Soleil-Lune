@@ -61,7 +61,7 @@ window.addEventListener('scroll', () => {
 const searchInput = document.querySelector('.search-form .box');
 const searchFormElement = document.querySelector('.search-form');
 
-// Sample suggested searches (you can replace with dynamic data)
+// Sample suggested searches
 const suggestedSearches = [
     'gaming',
     'travels',
@@ -82,14 +82,8 @@ function saveSearchHistory(searchTerm) {
     if (!searchTerm.trim()) return;
     
     let history = getSearchHistory();
-    
-    // Remove if already exists
     history = history.filter(term => term.toLowerCase() !== searchTerm.toLowerCase());
-    
-    // Add to beginning
     history.unshift(searchTerm);
-    
-    // Keep only last 5 searches
     history = history.slice(0, 5);
     
     localStorage.setItem('searchHistory', JSON.stringify(history));
@@ -205,129 +199,6 @@ if (searchInput && searchFormElement) {
 }
 
 // ==========================================
-// Confirmation Modal for Deletes
-// ==========================================
-
-function createModal() {
-    if (document.querySelector('.modal-overlay')) return;
-    
-    const modalHTML = `
-        <div class="modal-overlay">
-            <div class="modal">
-                <div class="modal-icon">
-                    <i class="fas fa-exclamation-circle"></i>
-                </div>
-                <h3>Confirm Delete</h3>
-                <p>Are you sure you want to delete this? This action cannot be undone.</p>
-                <div class="modal-buttons">
-                    <button class="modal-cancel">Cancel</button>
-                    <button class="modal-confirm">Delete</button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-}
-
-function showConfirmModal(message, onConfirm) {
-    createModal();
-    
-    const overlay = document.querySelector('.modal-overlay');
-    const modal = document.querySelector('.modal');
-    const modalText = modal.querySelector('p');
-    const confirmBtn = modal.querySelector('.modal-confirm');
-    const cancelBtn = modal.querySelector('.modal-cancel');
-    
-    // Update message
-    if (message) {
-        modalText.textContent = message;
-    }
-    
-    // Show modal
-    overlay.classList.add('active');
-    
-    // Confirm handler
-    const handleConfirm = () => {
-        overlay.classList.remove('active');
-        if (onConfirm) onConfirm();
-        cleanup();
-    };
-    
-    // Cancel handler
-    const handleCancel = () => {
-        overlay.classList.remove('active');
-        cleanup();
-    };
-    
-    // Cleanup listeners
-    const cleanup = () => {
-        confirmBtn.removeEventListener('click', handleConfirm);
-        cancelBtn.removeEventListener('click', handleCancel);
-        overlay.removeEventListener('click', handleOverlayClick);
-    };
-    
-    // Overlay click (close on background click)
-    const handleOverlayClick = (e) => {
-        if (e.target === overlay) {
-            handleCancel();
-        }
-    };
-    
-    confirmBtn.addEventListener('click', handleConfirm);
-    cancelBtn.addEventListener('click', handleCancel);
-    overlay.addEventListener('click', handleOverlayClick);
-}
-
-// Replace all delete confirmations with modal
-document.querySelectorAll('[onclick*="confirm"]').forEach(element => {
-    const onclickAttr = element.getAttribute('onclick');
-    const message = onclickAttr.match(/'([^']+)'/)?.[1] || 'Are you sure you want to delete this?';
-    
-    element.removeAttribute('onclick');
-    
-    element.addEventListener('click', (e) => {
-        e.preventDefault();
-        
-        showConfirmModal(message, () => {
-            // Find the parent form and submit it
-            const form = element.closest('form');
-            if (form) {
-                form.submit();
-            }
-        });
-    });
-});
-
-// Handle delete comment buttons specifically
-document.querySelectorAll('button[name="delete_comment"]').forEach(button => {
-    button.addEventListener('click', (e) => {
-        e.preventDefault();
-        
-        showConfirmModal('Are you sure you want to delete this comment?', () => {
-            const form = button.closest('form');
-            if (form) {
-                form.submit();
-            }
-        });
-    });
-});
-
-// Handle delete post buttons
-document.querySelectorAll('button[name="delete_post"]').forEach(button => {
-    button.addEventListener('click', (e) => {
-        e.preventDefault();
-        
-        showConfirmModal('Are you sure you want to delete this post? All comments will also be deleted.', () => {
-            const form = button.closest('form');
-            if (form) {
-                form.submit();
-            }
-        });
-    });
-});
-
-// ==========================================
 // Content Truncation
 // ==========================================
 
@@ -343,22 +214,18 @@ document.querySelectorAll('.post-content.content-150').forEach(content => {
 // ==========================================
 
 document.querySelectorAll('.posts-container .box-container .box').forEach(card => {
-    // Find the "read more" link inside the card
     const readMoreLink = card.querySelector('.inline-btn');
     
     if (readMoreLink) {
         const postUrl = readMoreLink.getAttribute('href');
         
-        // Make entire card clickable
         card.style.cursor = 'pointer';
         card.addEventListener('click', (e) => {
-            // Don't trigger if clicking on interactive elements
             if (!e.target.closest('button, a, form')) {
                 window.location.href = postUrl;
             }
         });
         
-        // Remove the "read more" button since card is clickable
         readMoreLink.style.display = 'none';
     }
 });
@@ -369,7 +236,6 @@ document.querySelectorAll('.posts-container .box-container .box').forEach(card =
 
 const messages = document.querySelectorAll('.message');
 messages.forEach(message => {
-    // Auto-dismiss after 5 seconds
     setTimeout(() => {
         message.style.opacity = '0';
         message.style.transform = 'translateY(-2rem)';
@@ -395,4 +261,4 @@ document.querySelectorAll('.icons button[name="like_post"]').forEach(button => {
     });
 });
 
-console.log('✨ Soleil|Lune loaded successfully!');
+console.log('Soleil|Lune loaded successfully!');

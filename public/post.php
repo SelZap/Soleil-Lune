@@ -37,8 +37,20 @@ if (isset($_POST['add_comment']) && $user_id) {
     exit();
 }
 
+// Handle edit comment
+if (isset($_POST['edit_comment']) && $user_id) {
+    $comment_id = sanitize($_POST['comment_id']);
+    $comment = sanitize($_POST['comment']);
+    $stmt = $conn->prepare("UPDATE comments SET comment = ? WHERE id = ? AND user_id = ?");
+    $stmt->execute([$comment, $comment_id, $user_id]);
+    setMessage('Comment updated!', 'success');
+    header("Location: ?id=" . $post_id);
+    exit();
+}
+
 // Handle delete comment
 if (isset($_POST['delete_comment']) && $user_id) {
+    error_log("Delete comment triggered - Comment ID: " . $_POST['comment_id']);
     $comment_id = sanitize($_POST['comment_id']);
     $stmt = $conn->prepare("DELETE FROM `comments` WHERE id = ? AND user_id = ?");
     $stmt->execute([$comment_id, $user_id]);
@@ -62,6 +74,59 @@ $is_liked = isLiked($post_id, $user_id);
     <link rel="stylesheet" href="/Soleil-Lune/assets/css/public.css">
     <link rel="stylesheet" href="/Soleil-Lune/assets/css/header.css">
     <link rel="icon" type="image/x-icon" href="/Soleil-Lune/assets/images/Soleil.ico">
+    <style>
+        .edit-comment-form {
+            margin-top: 1rem;
+            padding: 1.5rem;
+            background-color: var(--pastel-blue);
+            border-radius: .8rem;
+            border: var(--border);
+        }
+        .edit-comment-form textarea {
+            width: 100%;
+            padding: 1.2rem;
+            border: var(--border);
+            border-radius: .5rem;
+            font-size: 1.6rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+            background-color: var(--white);
+        }
+        .comment-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .comment-actions form {
+            margin: 0;
+        }
+        .edit-btn, .delete-btn-custom {
+            padding: 0.8rem 1.5rem;
+            color: var(--white);
+            border: none;
+            border-radius: .5rem;
+            cursor: pointer;
+            font-size: 1.4rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .edit-btn {
+            background-color: var(--orange);
+        }
+        .edit-btn:hover {
+            background-color: #E09350;
+            transform: translateY(-2px);
+        }
+        .delete-btn-custom {
+            background-color: var(--red);
+        }
+        .delete-btn-custom:hover {
+            background-color: #C88A8A;
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
     <?php include '../components/header.php'; ?>
@@ -87,7 +152,7 @@ $is_liked = isLiked($post_id, $user_id);
                 <?php endif; ?>
                 
                 <div class="post-title"><?php echo htmlspecialchars($post['title']); ?></div>
-                <div class="post-content" style="white-space: pre-line; max-height: none;"><?php echo htmlspecialchars($post['content']); ?></div>
+                <div class="post-content" style="white-space: pre-line; max-height: none; -webkit-line-clamp: unset;"><?php echo htmlspecialchars($post['content']); ?></div>
                 
                 <div class="icons">
                     <div><i class="fas fa-comment"></i><span>(<?php echo count($comments); ?>)</span></div>
@@ -134,14 +199,34 @@ $is_liked = isLiked($post_id, $user_id);
                             <div><?php echo date('M d, Y', strtotime($comment['date'])); ?></div>
                         </div>
                     </div>
-                    <div class="comment-box"><?php echo htmlspecialchars($comment['comment']); ?></div>
+                    
+                    <!-- Display mode -->
+                    <div class="comment-box" id="comment-display-<?php echo $comment['id']; ?>" style="margin-bottom: 0;">
+                        <?php echo htmlspecialchars($comment['comment']); ?>
+                    </div>
+                    
+                    <!-- Edit mode (hidden by default) -->
+                    <form action="" method="POST" class="edit-comment-form" id="comment-edit-<?php echo $comment['id']; ?>" style="display: none;">
+                        <input type="hidden" name="comment_id" value="<?php echo $comment['id']; ?>">
+                        <textarea name="comment" rows="4" required><?php echo htmlspecialchars($comment['comment']); ?></textarea>
+                        <div class="comment-actions">
+                            <button type="submit" class="inline-btn" name="edit_comment">Save Changes</button>
+                            <button type="button" class="option-btn" onclick="cancelEdit(<?php echo $comment['id']; ?>)">Cancel</button>
+                        </div>
+                    </form>
                     
                     <?php if ($comment['user_id'] == $user_id): ?>
-                    <form action="" method="POST">
-                        <input type="hidden" name="comment_id" value="<?php echo $comment['id']; ?>">
-                        <button type="submit" class="inline-delete-btn" name="delete_comment" 
-                                onclick="return confirm('Delete this comment?');">Delete</button>
-                    </form>
+                    <div class="comment-actions">
+                        <button type="button" class="edit-btn" onclick="showEditForm(<?php echo $comment['id']; ?>)">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <form action="" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this comment?');">
+                            <input type="hidden" name="comment_id" value="<?php echo $comment['id']; ?>">
+                            <button type="submit" class="delete-btn-custom" name="delete_comment">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </div>
                     <?php endif; ?>
                 </div>
                 <?php endforeach; ?>
@@ -152,5 +237,16 @@ $is_liked = isLiked($post_id, $user_id);
     </section>
 
     <script src="/Soleil-Lune/assets/js/script.js"></script>
+    <script>
+        function showEditForm(commentId) {
+            document.getElementById('comment-display-' + commentId).style.display = 'none';
+            document.getElementById('comment-edit-' + commentId).style.display = 'block';
+        }
+        
+        function cancelEdit(commentId) {
+            document.getElementById('comment-display-' + commentId).style.display = 'block';
+            document.getElementById('comment-edit-' + commentId).style.display = 'none';
+        }
+    </script>
 </body>
 </html>
