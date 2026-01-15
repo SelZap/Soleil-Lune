@@ -261,4 +261,92 @@ document.querySelectorAll('.icons button[name="like_post"]').forEach(button => {
     });
 });
 
+// ==========================================
+// Confirmation Modal for Deletes
+// ==========================================
+
+function createModal() {
+    if (document.querySelector('.modal-overlay')) return;
+    
+    const modalHTML = `
+        <div class="modal-overlay">
+            <div class="modal">
+                <div class="modal-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <h3>Confirm Delete</h3>
+                <p>Are you sure you want to delete this? This action cannot be undone.</p>
+                <div class="modal-buttons">
+                    <button class="modal-cancel">Cancel</button>
+                    <button class="modal-confirm">Delete</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function showConfirmModal(message, onConfirm, onCancel) {
+    createModal();
+    
+    const overlay = document.querySelector('.modal-overlay');
+    const modal = document.querySelector('.modal');
+    const modalText = modal.querySelector('p');
+    const confirmBtn = modal.querySelector('.modal-confirm');
+    const cancelBtn = modal.querySelector('.modal-cancel');
+    
+    if (message) {
+        modalText.textContent = message;
+    }
+    
+    overlay.classList.add('active');
+    
+    const handleConfirm = () => {
+        overlay.classList.remove('active');
+        if (onConfirm) onConfirm();
+        cleanup();
+    };
+    
+    const handleCancel = () => {
+        overlay.classList.remove('active');
+        if (onCancel) onCancel();
+        cleanup();
+    };
+    
+    const cleanup = () => {
+        confirmBtn.removeEventListener('click', handleConfirm);
+        cancelBtn.removeEventListener('click', handleCancel);
+        overlay.removeEventListener('click', handleOverlayClick);
+    };
+    
+    const handleOverlayClick = (e) => {
+        if (e.target === overlay) {
+            handleCancel();
+        }
+    };
+    
+    confirmBtn.addEventListener('click', handleConfirm);
+    cancelBtn.addEventListener('click', handleCancel);
+    overlay.addEventListener('click', handleOverlayClick);
+}
+
+// Global function that buttons can call
+window.confirmDelete = function(event, message) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const button = event.target.closest('button');
+    const form = button.closest('form');
+    
+    showConfirmModal(message, () => {
+        // Remove the onclick to prevent loop
+        button.removeAttribute('onclick');
+        // Click the button again to submit
+        button.click();
+    });
+    
+    return false;
+};
+
 console.log('Soleil|Lune loaded successfully!');

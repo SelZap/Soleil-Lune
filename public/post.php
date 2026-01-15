@@ -220,9 +220,9 @@ $is_liked = isLiked($post_id, $user_id);
                         <button type="button" class="edit-btn" onclick="showEditForm(<?php echo $comment['id']; ?>)">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <form action="" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this comment?');">
+                        <form action="" method="POST" style="display: inline;">
                             <input type="hidden" name="comment_id" value="<?php echo $comment['id']; ?>">
-                            <button type="submit" class="delete-btn-custom" name="delete_comment">
+                            <button type="submit" class="delete-btn-custom" name="delete_comment" onclick="return confirmDelete(event, 'Are you sure you want to delete this comment?')">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
                         </form>

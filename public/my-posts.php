@@ -245,9 +245,9 @@ if ($action == 'edit' && $post_id) {
                     <a href="?action=edit&id=<?= $post['id'] ?>" class="option-btn" style="flex: 1; text-align: center;">
                         <i class="fas fa-edit"></i> Edit
                     </a>
-                    <form method="post" style="flex: 1; margin: 0;" onsubmit="return confirm('Are you sure you want to delete this post? All comments will also be deleted.');">
+                    <form method="post" style="flex: 1; margin: 0;">
                         <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
-                        <button type="submit" name="delete_post" class="delete-btn" style="width: 100%;">
+                        <button type="submit" name="delete_post" class="delete-btn" style="width: 100%;" onclick="return confirmDelete(event, 'Are you sure you want to delete this post? All comments will also be deleted.')">
                             <i class="fas fa-trash"></i> Delete
                         </button>
                     </form>
