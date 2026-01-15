@@ -1,7 +1,4 @@
 <?php
-/**
- * Utility Functions
- */
 
 // Sanitize input
 function sanitize($data) {
@@ -83,36 +80,52 @@ function requireAdmin() {
     }
 }
 
-// Upload image
+// Upload image 
 function uploadImage($file, $uploadDir = '../assets/uploads/') {
+    // Check if file was uploaded
+    if (!isset($file) || $file['error'] === UPLOAD_ERR_NO_FILE) {
+        return ['success' => false, 'message' => 'No file uploaded'];
+    }
+    
     $fileName = $file['name'];
     $fileTmpName = $file['tmp_name'];
     $fileSize = $file['size'];
     $fileError = $file['error'];
     
+    // Get file extension
     $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
     $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     
+    // Validate extension
     if (!in_array($fileExt, $allowed)) {
-        return ['success' => false, 'message' => 'Invalid file type'];
+        return ['success' => false, 'message' => 'Invalid file type. Allowed: jpg, jpeg, png, gif, webp'];
     }
     
+    // Check for upload errors
     if ($fileError !== 0) {
-        return ['success' => false, 'message' => 'Error uploading file'];
+        return ['success' => false, 'message' => 'Error uploading file (Code: ' . $fileError . ')'];
     }
     
-    if ($fileSize > 2000000) { // 2MB
-        return ['success' => false, 'message' => 'File too large'];
+    // Check file size (5MB max)
+    if ($fileSize > 5000000) {
+        return ['success' => false, 'message' => 'File too large (max 5MB)'];
     }
     
-    $newFileName = uniqid('', true) . '.' . $fileExt;
+    // Create unique filename
+    $newFileName = uniqid('img_', true) . '.' . $fileExt;
     $fileDestination = $uploadDir . $newFileName;
     
+    // Ensure upload directory exists
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
+    
+    // Move uploaded file
     if (move_uploaded_file($fileTmpName, $fileDestination)) {
         return ['success' => true, 'filename' => $newFileName];
     }
     
-    return ['success' => false, 'message' => 'Failed to move file'];
+    return ['success' => false, 'message' => 'Failed to move uploaded file'];
 }
 
 // Delete image

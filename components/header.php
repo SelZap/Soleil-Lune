@@ -5,7 +5,7 @@ if (isset($_SESSION['message'])) {
     $message = $_SESSION['message'];
     
     echo '
-    <div class="message">
+    <div class="message" style="position: fixed; top: 8rem; left: 50%; transform: translateX(-50%); z-index: 10000; max-width: 1200px; width: 90%; margin: 0;">
         <span>' . htmlspecialchars($message) . '</span>
         <i class="fas fa-times" onclick="this.parentElement.remove();"></i>
     </div>
@@ -41,6 +41,7 @@ if (isset($_SESSION['message'])) {
          <a href="/Soleil-Lune/public/categories.php"> <i class="fas fa-angle-right"></i> categories</a>
          <a href="/Soleil-Lune/public/authors.php"> <i class="fas fa-angle-right"></i> authors</a>
          <?php if(isset($_SESSION['user_id'])): ?>
+            <a href="/Soleil-Lune/public/my-posts.php"> <i class="fas fa-angle-right"></i> my posts</a>
             <a href="/Soleil-Lune/public/profile.php"> <i class="fas fa-angle-right"></i> profile</a>
             <a href="/Soleil-Lune/public/auth.php?action=logout"> <i class="fas fa-angle-right"></i> logout</a>
          <?php else: ?>
@@ -59,8 +60,11 @@ if (isset($_SESSION['message'])) {
             <p class="name"><?= htmlspecialchars($user['name']) ?></p>
             <a href="/Soleil-Lune/public/profile.php" class="btn">update profile</a>
             <div class="flex-btn">
-               <a href="/Soleil-Lune/public/profile.php?tab=likes" class="option-btn">likes</a>
-               <a href="/Soleil-Lune/public/profile.php?tab=comments" class="option-btn">comments</a>
+               <a href="/Soleil-Lune/public/my-posts.php" class="option-btn">my posts</a>
+               <a href="/Soleil-Lune/public/profile.php?view=likes" class="option-btn">likes</a>
+            </div>
+            <div class="flex-btn">
+               <a href="/Soleil-Lune/public/profile.php?view=comments" class="option-btn">comments</a>
             </div> 
             <a href="/Soleil-Lune/public/auth.php?action=logout" onclick="return confirm('logout from this website?');" class="delete-btn">logout</a>
          <?php else: ?>

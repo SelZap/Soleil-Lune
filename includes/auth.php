@@ -2,7 +2,7 @@
 /**
  * Authentication Functions
  */
-
+// for demonstration
 // Login function
 function login($username, $password, $isAdmin = false) {
     global $conn;
