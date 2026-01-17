@@ -29,10 +29,24 @@ chatbotOverlay.addEventListener('click', () => {
    chatbotOverlay.classList.remove('active');
 });
 
+// Get current time in 12-hour format
+function getCurrentTime() {
+   const now = new Date();
+   let hours = now.getHours();
+   const minutes = now.getMinutes();
+   const ampm = hours >= 12 ? 'PM' : 'AM';
+   
+   hours = hours % 12;
+   hours = hours ? hours : 12; // 0 should be 12
+   const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+   
+   return `${hours}:${minutesStr} ${ampm}`;
+}
+
 // Show typing indicator
 function showTypingIndicator() {
    const typingDiv = document.createElement('div');
-   typingDiv.className = 'message bot';
+   typingDiv.className = 'message bot show';
    typingDiv.id = 'typing-indicator';
    typingDiv.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
    chatbotMessages.appendChild(typingDiv);
@@ -138,7 +152,13 @@ async function selectMenu(menuId, buttonText, isAskAgain = false) {
 function addMessage(text, sender) {
    const messageDiv = document.createElement('div');
    messageDiv.className = `message ${sender}`;
-   messageDiv.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
+   
+   const timestamp = getCurrentTime();
+   
+   messageDiv.innerHTML = `
+      <div class="message-content">${escapeHtml(text)}</div>
+      <div class="message-timestamp">${timestamp}</div>
+   `;
    chatbotMessages.appendChild(messageDiv);
    
    // Trigger animation
@@ -152,6 +172,8 @@ function addMessage(text, sender) {
 function addBotMessage(text, buttons = [], actionButton = null, menuId = null, showAskAgain = false, parentId = null) {
    const messageDiv = document.createElement('div');
    messageDiv.className = 'message bot';
+   
+   const timestamp = getCurrentTime();
    
    let buttonsHtml = '';
    
@@ -171,20 +193,24 @@ function addBotMessage(text, buttons = [], actionButton = null, menuId = null, s
       buttonsHtml += `<div class="quick-replies" style="margin-top: 8px;"><a href="${actionButton.link}" class="message-button" target="_blank">${escapeHtml(actionButton.text)}</a></div>`;
    }
    
-   // Action buttons - only show "Ask Again" for leaf nodes (final answers)
+   // Action buttons - removed emoji from Ask Again button
    if (menuId) {
       buttonsHtml += '<div class="action-buttons">';
       buttonsHtml += `<button class="action-btn back-btn" onclick="initializeChat()">← Back to Menu</button>`;
       
-      // "Ask Again" brings back the parent menu's options
+      // "Ask Again" brings back the parent menu's options - NO EMOJI
       if (showAskAgain && parentId) {
-         buttonsHtml += `<button class="action-btn ask-again-btn" onclick="selectMenu(${parentId}, null, true)">🔄 Ask Again</button>`;
+         buttonsHtml += `<button class="action-btn ask-again-btn" onclick="selectMenu(${parentId}, null, true)">Ask Again</button>`;
       }
       
       buttonsHtml += '</div>';
    }
    
-   messageDiv.innerHTML = `<div class="message-content">${escapeHtml(text).replace(/\n/g, '<br>')}</div>${buttonsHtml}`;
+   messageDiv.innerHTML = `
+      <div class="message-content">${escapeHtml(text).replace(/\n/g, '<br>')}</div>
+      <div class="message-timestamp">${timestamp}</div>
+      ${buttonsHtml}
+   `;
    chatbotMessages.appendChild(messageDiv);
    
    // Trigger animation
