@@ -1,32 +1,36 @@
 <?php
 /**
- * Authentication Functions
+ * Authentication Functions - Fixed for Admin & User
  */
-// for demonstration
+
 // Login function
-function login($username, $password, $isAdmin = false) {
+function login($identifier, $password, $isAdmin = false) {
     global $conn;
     
     $password = sha1($password);
     
     if ($isAdmin) {
-        $stmt = $conn->prepare("SELECT * FROM admin WHERE name = ? AND password = ?");
-        $stmt->execute([$username, $password]);
+        // Admin login using email
+        $stmt = $conn->prepare("SELECT * FROM admin WHERE email = ? AND password = ?");
+        $stmt->execute([$identifier, $password]);
         
         if ($stmt->rowCount() > 0) {
             $admin = $stmt->fetch(PDO::FETCH_ASSOC);
             $_SESSION['admin_id'] = $admin['id'];
             $_SESSION['admin_name'] = $admin['name'];
+            $_SESSION['admin_email'] = $admin['email'];
             return true;
         }
     } else {
+        // User login using email
         $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
-        $stmt->execute([$username, $password]);
+        $stmt->execute([$identifier, $password]);
         
         if ($stmt->rowCount() > 0) {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_email'] = $user['email'];
             return true;
         }
     }
@@ -46,7 +50,7 @@ function logout($isAdmin = false) {
     exit();
 }
 
-// Register function
+// Register function (for users only)
 function register($name, $email, $password, $confirmPassword) {
     global $conn;
     
@@ -81,10 +85,42 @@ function register($name, $email, $password, $confirmPassword) {
         
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['name'];
+        $_SESSION['user_email'] = $user['email'];
         
         return ['success' => true, 'message' => 'Registration successful'];
     }
     
     return ['success' => false, 'message' => 'Registration failed'];
+}
+
+// Helper functions for checking login status
+function isLoggedIn() {
+    return isset($_SESSION['user_id']);
+}
+
+function isAdmin() {
+    return isset($_SESSION['admin_id']);
+}
+
+function getUserId() {
+    return $_SESSION['user_id'] ?? null;
+}
+
+function getAdminId() {
+    return $_SESSION['admin_id'] ?? null;
+}
+
+function requireLogin() {
+    if (!isLoggedIn()) {
+        header('Location: /Soleil-Lune/public/auth.php?action=login');
+        exit();
+    }
+}
+
+function requireAdmin() {
+    if (!isAdmin()) {
+        header('Location: /Soleil-Lune/admin/index.php?action=login');
+        exit();
+    }
 }
 ?>

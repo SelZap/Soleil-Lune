@@ -1,4 +1,8 @@
 <?php
+/**
+ * Helper Functions for Soleil|Lune
+ * NOTE: Auth functions (isLoggedIn, requireAdmin, etc.) are in auth.php
+ */
 
 // Sanitize input
 function sanitize($data) {
@@ -42,42 +46,6 @@ function truncate($text, $length = 150) {
         return substr($text, 0, $length) . '...';
     }
     return $text;
-}
-
-// Check if user is logged in
-function isLoggedIn() {
-    return isset($_SESSION['user_id']);
-}
-
-// Check if admin is logged in
-function isAdmin() {
-    return isset($_SESSION['admin_id']);
-}
-
-// Get current user ID
-function getUserId() {
-    return $_SESSION['user_id'] ?? null;
-}
-
-// Get current admin ID
-function getAdminId() {
-    return $_SESSION['admin_id'] ?? null;
-}
-
-// Require user to be logged in
-function requireLogin() {
-    if (!isLoggedIn()) {
-        header('Location: /Soleil-Lune/public/auth.php?action=login');
-        exit();
-    }
-}
-
-// Require admin to be logged in
-function requireAdmin() {
-    if (!isAdmin()) {
-        header('Location: /Soleil-Lune/admin/index.php?action=login');
-        exit();
-    }
 }
 
 // Upload image 
