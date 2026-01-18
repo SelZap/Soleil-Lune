@@ -146,7 +146,7 @@ $like_count = $stmt->fetchColumn();
 
     <section style="max-width: 1400px; margin: 0 auto; padding: 3rem 2rem;">
         <div class="admin-header">
-            <h1>👋 Welcome back, <?= htmlspecialchars($admin['name']) ?>!</h1>
+            <h1> Welcome back, <?= htmlspecialchars($admin['name']) ?>!</h1>
             <p>Here's what's happening with your blog today</p>
         </div>
 
@@ -178,28 +178,22 @@ $like_count = $stmt->fetchColumn();
 
         <h2 class="heading" style="margin-bottom: 2rem;">Quick Actions</h2>
         <div class="quick-actions">
-            <a href="posts.php?action=add" class="action-card">
-                <i class="fas fa-plus-circle"></i>
-                <h4>Create New Post</h4>
-                <p style="font-size: 1.4rem; color: var(--light-color);">Start writing</p>
-            </a>
-            
             <a href="posts.php" class="action-card">
                 <i class="fas fa-edit"></i>
                 <h4>Manage Posts</h4>
                 <p style="font-size: 1.4rem; color: var(--light-color);">Edit & delete</p>
             </a>
             
+            <a href="comments.php" class="action-card">
+                <i class="fas fa-comment-dots"></i>
+                <h4>Manage Comments</h4>
+                <p style="font-size: 1.4rem; color: var(--light-color);">Review & moderate</p>
+            </a>
+            
             <a href="settings.php" class="action-card">
                 <i class="fas fa-cog"></i>
                 <h4>Settings</h4>
                 <p style="font-size: 1.4rem; color: var(--light-color);">Update profile</p>
-            </a>
-            
-            <a href="/Soleil-Lune/public/index.php" class="action-card">
-                <i class="fas fa-eye"></i>
-                <h4>View Blog</h4>
-                <p style="font-size: 1.4rem; color: var(--light-color);">Public view</p>
             </a>
         </div>
     </section>
