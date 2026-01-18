@@ -41,8 +41,8 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin';
       <nav class="navbar">
          <a href="/Soleil-Lune/admin/index.php"> <i class="fas fa-angle-right"></i> dashboard</a>
          <a href="/Soleil-Lune/admin/posts.php"> <i class="fas fa-angle-right"></i> posts</a>
+         <a href="/Soleil-Lune/admin/comments.php"> <i class="fas fa-angle-right"></i> comments</a>
          <a href="/Soleil-Lune/admin/settings.php"> <i class="fas fa-angle-right"></i> settings</a>
-         <a href="/Soleil-Lune/public/index.php"> <i class="fas fa-angle-right"></i> view blog</a>
          <a href="/Soleil-Lune/admin/index.php?action=logout" onclick="return confirm('Logout from admin panel?');"> <i class="fas fa-angle-right"></i> logout</a>
       </nav>
 
@@ -52,7 +52,7 @@ $admin_name = $_SESSION['admin_name'] ?? 'Admin';
             <p style="font-size: 1.4rem; color: var(--light-color); padding-bottom: 1rem;">Administrator</p>
             <div class="flex-btn">
                <a href="/Soleil-Lune/admin/posts.php" class="option-btn">manage posts</a>
-               <a href="/Soleil-Lune/admin/settings.php" class="option-btn">settings</a>
+               <a href="/Soleil-Lune/admin/comments.php" class="option-btn">manage comments</a>
             </div>
             <a href="/Soleil-Lune/admin/index.php?action=logout" onclick="return confirm('logout from admin panel?');" class="delete-btn">logout</a>
          <?php endif; ?>
