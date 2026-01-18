@@ -7,22 +7,24 @@ require_once '../includes/functions.php';
 $user_id = getUserId();
 $post_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
+// SAFETY CHECK: If no post_id, redirect safely
 if (!$post_id) {
-    header('location: posts.php');
+    header('Location: /Soleil-Lune/public/posts.php');
     exit();
 }
 
 $post = getPost($post_id);
 if (!$post || $post['status'] != 'active') {
     setMessage('Post not found!');
-    header('location: posts.php');
+    header('Location: /Soleil-Lune/public/posts.php');
     exit();
 }
 
 // Handle like
 if (isset($_POST['like_post']) && $user_id) {
     toggleLike($post_id, $user_id, $post['admin_id']);
-    header("Location: ?id=" . $post_id);
+    // SAFE REDIRECT with full path
+    header("Location: /Soleil-Lune/public/post.php?id=" . $post_id);
     exit();
 }
 
@@ -33,7 +35,8 @@ if (isset($_POST['add_comment']) && $user_id) {
                             SELECT ?, ?, ?, u.name, ? FROM users u WHERE u.id = ?");
     $stmt->execute([$post_id, $post['admin_id'], $user_id, $comment, $user_id]);
     setMessage('Comment added!', 'success');
-    header("Location: ?id=" . $post_id);
+    // SAFE REDIRECT with full path
+    header("Location: /Soleil-Lune/public/post.php?id=" . $post_id);
     exit();
 }
 
@@ -44,18 +47,29 @@ if (isset($_POST['edit_comment']) && $user_id) {
     $stmt = $conn->prepare("UPDATE comments SET comment = ? WHERE id = ? AND user_id = ?");
     $stmt->execute([$comment, $comment_id, $user_id]);
     setMessage('Comment updated!', 'success');
-    header("Location: ?id=" . $post_id);
+    // SAFE REDIRECT with full path
+    header("Location: /Soleil-Lune/public/post.php?id=" . $post_id);
     exit();
 }
 
-// Handle delete comment
+// Handle delete comment - PROTECTED VERSION
 if (isset($_POST['delete_comment']) && $user_id) {
-    error_log("Delete comment triggered - Comment ID: " . $_POST['comment_id']);
     $comment_id = sanitize($_POST['comment_id']);
-    $stmt = $conn->prepare("DELETE FROM `comments` WHERE id = ? AND user_id = ?");
-    $stmt->execute([$comment_id, $user_id]);
-    setMessage('Comment deleted!', 'success');
-    header("Location: ?id=" . $post_id);
+    
+    // Extra validation: Make sure comment belongs to user
+    $check_stmt = $conn->prepare("SELECT * FROM `comments` WHERE id = ? AND user_id = ?");
+    $check_stmt->execute([$comment_id, $user_id]);
+    
+    if ($check_stmt->rowCount() > 0) {
+        $stmt = $conn->prepare("DELETE FROM `comments` WHERE id = ? AND user_id = ?");
+        $stmt->execute([$comment_id, $user_id]);
+        setMessage('Comment deleted!', 'success');
+    } else {
+        setMessage('Cannot delete this comment!', 'error');
+    }
+    
+    // SAFE REDIRECT with full path 
+    header("Location: /Soleil-Lune/public/post.php?id=" . $post_id);
     exit();
 }
 
@@ -131,7 +145,7 @@ $is_liked = isLiked($post_id, $user_id);
 <body>
     <?php include '../components/header.php'; ?>
 
-    <section class="posts-container" style="padding-bottom: 0;">
+    <section class="posts-container" style="padding-bottom: 2rem; margin-bottom: 0;">
         <div class="box-container" style="grid-template-columns: 1fr;">
             <form class="box" method="post">
                 <input type="hidden" name="post_id" value="<?php echo $post_id; ?>">
@@ -164,9 +178,8 @@ $is_liked = isLiked($post_id, $user_id);
             </form>
         </div>
     </section>
-
-    <section class="comments-container">
-        <p class="comment-title">Add Comment</p>
+    <section class="comments-container" style="margin-top: 0; padding-top: 2rem;">
+        <p class="comment-title" style="margin-bottom: 0;">Add Comment</p>
         <?php if ($user_id): 
             $stmt = $conn->prepare("SELECT * FROM `users` WHERE id = ?");
             $stmt->execute([$user_id]);
@@ -174,24 +187,24 @@ $is_liked = isLiked($post_id, $user_id);
             
             if ($user):
         ?>
-        <form action="" method="post" class="add-comment">
+        <form action="" method="post" class="add-comment" style="margin-top: 0; margin-bottom: 2rem;">
             <p class="user"><i class="fas fa-user"></i> <?php echo htmlspecialchars($user['name']); ?></p>
             <textarea name="comment" maxlength="1000" class="comment-box" required placeholder="Write your comment"></textarea>
             <input type="submit" value="Add Comment" class="inline-btn" name="add_comment">
         </form>
         <?php endif; ?>
         <?php else: ?>
-        <div class="add-comment">
+        <div class="add-comment" style="margin-top: 0; margin-bottom: 2rem;">
             <p>Please login to add comments</p>
             <a href="/Soleil-Lune/public/auth.php?action=login" class="inline-btn">Login Now</a>
         </div>
         <?php endif; ?>
         
-        <p class="comment-title">Post Comments</p>
-        <div class="user-comments-container">
+        <p class="comment-title" style="margin-bottom: 0; margin-top: 0;">Post Comments</p>
+        <div class="user-comments-container" style="margin-top: 0;">
             <?php if (!empty($comments)): ?>
                 <?php foreach ($comments as $comment): ?>
-                <div class="show-comments">
+                <div class="show-comments" style="margin-bottom: 0;">
                     <div class="comment-user">
                         <i class="fas fa-user"></i>
                         <div>
@@ -205,7 +218,7 @@ $is_liked = isLiked($post_id, $user_id);
                         <?php echo htmlspecialchars($comment['comment']); ?>
                     </div>
                     
-                    <!-- Edit mode (hidden by default) -->
+                    <!-- Edit mode -->
                     <form action="" method="POST" class="edit-comment-form" id="comment-edit-<?php echo $comment['id']; ?>" style="display: none;">
                         <input type="hidden" name="comment_id" value="<?php echo $comment['id']; ?>">
                         <textarea name="comment" rows="4" required><?php echo htmlspecialchars($comment['comment']); ?></textarea>
