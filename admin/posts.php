@@ -372,7 +372,7 @@ if ($action == 'edit' && $post_id) {
     <?php else: ?>
     <section class="posts-section">
         <div class="add-post-btn-container">
-            <h1 class="heading" style="margin: 0;">Your Posts</h1>
+            <h1 class="heading" style="margin: 0;">Manage Posts</h1>
             <div style="display: flex; align-items: center; gap: 2rem;">
                 <span class="post-count">
                     <i class="fas fa-file-alt"></i> <?= count($posts) ?> Post<?= count($posts) != 1 ? 's' : '' ?>
