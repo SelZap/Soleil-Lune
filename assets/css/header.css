@@ -1,3 +1,6 @@
+/* ========================================
+   FIXED HEADER - Responsive Updates
+   ======================================== */
 
 .header{
    background: #FFFFFF;
@@ -8,53 +11,285 @@
    z-index: 1000;
    box-shadow: 0 .2rem 1rem rgba(0,0,0,.08);
    border-bottom: .1rem solid rgba(184, 134, 11, 0.15);
-   height: 8rem; 
+   min-height: 8rem; /* Changed from fixed height to min-height */
 }
 
 .header .flex{
    display: flex;
    align-items: center;
-   gap: 3rem;
+   gap: 2rem; /* Reduced from 3rem */
    position: relative;
-   padding: 1.5rem 4rem;
+   padding: 1.5rem 2rem; /* Reduced horizontal padding */
    max-width: 140rem;
    margin: 0 auto;
-   height: 100%; 
+   min-height: 8rem;
+   justify-content: space-between; /* Better spacing control */
 }
 
-/* Logo */
+/* Logo - ensure it stays visible */
 .header .flex .logo{
    flex-shrink: 0;
    display: flex;
    align-items: center;
-   margin-right: 2rem;
+   margin-right: 1rem; /* Reduced from 2rem */
 }
 
 .header .flex .logo img{
-   height: 5rem;
+   height: 4.5rem; /* Slightly reduced for better fit */
    width: auto;
    filter: drop-shadow(0 .2rem .4rem rgba(184, 134, 11, 0.15));
    transition: var(--transition);
 }
 
-.header .flex .logo img:hover{
-   filter: drop-shadow(0 .3rem .6rem rgba(184, 134, 11, 0.25));
-   transform: scale(1.02);
-}
-
-/* Search Form */
+/* Search Form - more compact */
 .header .flex .search-form{
    border: .15rem solid rgba(184, 134, 11, 0.2);
    border-radius: 2.5rem;
    background-color: #FAFAFA;
    display: flex;
    gap: 1rem;
-   padding: 1rem 2rem;
-   width: 40rem;
+   padding: 1rem 1.5rem; /* Reduced padding */
+   width: 100%;
+   max-width: 35rem; /* Add max-width */
    position: relative;
-   flex-shrink: 0;
+   flex-shrink: 1; /* Allow shrinking */
    align-items: center;
    transition: var(--transition);
+}
+
+/* Navigation - compact on medium screens */
+.header .flex .navbar{
+   display: flex !important;
+   align-items: center;
+   gap: 0.3rem; /* Reduced gap */
+   flex: 0 1 auto; /* Don't take too much space */
+   justify-content: center;
+   position: static;
+   border: none;
+   background: none;
+   box-shadow: none;
+   padding: 0;
+   margin: 0 auto; /* Center the navbar */
+}
+
+.header .flex .navbar a{
+   font-size: 1.5rem; /* Slightly smaller */
+   color: var(--black);
+   padding: 0.8rem 1.2rem; /* More compact */
+   border-radius: .5rem;
+   background-color: transparent;
+   transition: var(--transition);
+   position: relative;
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   margin: 0;
+   text-transform: capitalize;
+   font-weight: 500;
+   white-space: nowrap;
+}
+
+/* Icons - ensure they're visible */
+.header .flex .icons{
+   display: flex;
+   gap: 1rem;
+   align-items: center;
+   flex-shrink: 0;
+   margin-left: 0; /* Remove auto margin */
+}
+
+.header .flex .icons div{
+   font-size: 2rem;
+   color: var(--main-color);
+   cursor: pointer;
+   height: 4.5rem;
+   width: 4.5rem;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   border: .15rem solid rgba(184, 134, 11, 0.2);
+   background-color: #FFFFFF;
+   border-radius: 50%;
+   transition: var(--transition);
+}
+
+/* Hide menu button on desktop and medium screens */
+.header .flex .icons #menu-btn{
+   display: none !important;
+}
+
+#search-btn{
+   display: none;
+}
+
+/* Medium screens (991px - 1200px) - CRITICAL FIX */
+@media (max-width:1200px) and (min-width:769px){
+   .header{
+      min-height: auto;
+   }
+   
+   .header .flex{
+      padding: 1.2rem 2rem;
+      gap: 1.5rem;
+   }
+   
+   .header .flex .logo img{
+      height: 4rem;
+   }
+   
+   .header .flex .search-form{
+      max-width: 30rem;
+   }
+   
+   .header .flex .navbar{
+      gap: 0.3rem;
+   }
+   
+   .header .flex .navbar a{
+      font-size: 1.5rem;
+      padding: 0.8rem 1.2rem;
+   }
+   
+   /* Keep icons normal size, just hide menu button */
+   .header .flex .icons #menu-btn{
+      display: none !important;
+   }
+   
+   #search-btn{
+      display: none;
+   }
+}
+
+/* Tablet screens (768px and below) */
+@media (max-width:768px){
+   .header {
+      min-height: 7rem;
+   }
+   
+   #search-btn{
+      display: flex;
+   }
+   
+   .header .flex .icons #menu-btn{
+      display: flex !important;
+   }
+   
+   .header .flex{
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      padding: 1.5rem 2rem;
+   }
+   
+   .header .flex .logo{
+      order: 1;
+   }
+   
+   .header .flex .icons{
+      order: 2;
+   }
+   
+   .header .flex .logo img{
+      height: 4rem;
+   }
+   
+   .header .flex .navbar{
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #FFFFFF;
+      border-top: .1rem solid rgba(184, 134, 11, 0.15);
+      padding: 2rem;
+      flex-direction: column;
+      gap: 1rem;
+      display: none !important;
+      box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08);
+      z-index: 100;
+      order: 3;
+      width: 100%;
+   }
+   
+   .header .flex .navbar.active{
+      display: flex !important;
+   }
+   
+   .header .flex .navbar a{
+      width: 100%;
+      text-align: center;
+      padding: 1.2rem 2rem;
+      font-size: 1.6rem;
+   }
+
+   .header .flex .search-form{
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      border-left: none;
+      border-right: none;
+      border-radius: 0;
+      width: 100%;
+      max-width: 100%;
+      background: #FFFFFF;
+      box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08);
+      padding: 2rem;
+      clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+      transition: clip-path .3s ease;
+      z-index: 99;
+      border-top: .1rem solid rgba(184, 134, 11, 0.15);
+   }
+
+   .header .flex .search-form.active{
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+   }
+   
+   .header .flex .profile{
+      right: 2rem;
+   }
+}
+
+/* Mobile screens (450px and below) */
+@media (max-width:450px){
+   .header .flex{
+      padding: 1.2rem 1.5rem;
+   }
+   
+   .header .flex .logo img{
+      height: 3.5rem;
+   }
+   
+   .header .flex .icons div{
+      height: 3.5rem;
+      width: 3.5rem;
+      font-size: 1.6rem;
+   }
+}
+
+/* Keep all other header styles from original */
+.header .flex .navbar a::after{
+   content: '';
+   position: absolute;
+   bottom: .5rem;
+   left: 50%;
+   transform: translateX(-50%);
+   width: 0;
+   height: .2rem;
+   background-color: var(--main-color);
+   border-radius: 1rem;
+   transition: width 0.3s ease;
+}
+
+.header .flex .navbar a:hover{
+   color: var(--main-color);
+   background-color: rgba(184, 134, 11, 0.05);
+}
+
+.header .flex .navbar a:hover::after{
+   width: 70%;
+}
+
+.header .flex .navbar a i{
+   display: none;
 }
 
 .header .flex .search-form:focus-within{
@@ -82,101 +317,6 @@
    transition: var(--transition);
 }
 
-.header .flex .search-form .fa-search:hover{
-   color: var(--main-light);
-   transform: scale(1.1);
-}
-
-/* Navigation */
-.header .flex .navbar{
-   display: flex !important;
-   align-items: center;
-   gap: 0.5rem;
-   flex: 1;
-   justify-content: center;
-   position: static;
-   border: none;
-   background: none;
-   box-shadow: none;
-   padding: 0;
-   margin: 0;
-}
-
-.header .flex .navbar a{
-   font-size: 1.6rem;
-   color: var(--black);
-   padding: 1rem 2rem;
-   border-radius: .5rem;
-   background-color: transparent;
-   transition: var(--transition);
-   position: relative;
-   display: inline-flex;
-   align-items: center;
-   justify-content: center;
-   margin: 0;
-   text-transform: capitalize;
-   font-weight: 500;
-   white-space: nowrap;
-}
-
-.header .flex .navbar a::after{
-   content: '';
-   position: absolute;
-   bottom: .5rem;
-   left: 50%;
-   transform: translateX(-50%);
-   width: 0;
-   height: .2rem;
-   background-color: var(--main-color);
-   border-radius: 1rem;
-   transition: width 0.3s ease;
-}
-
-.header .flex .navbar a:hover{
-   color: var(--main-color);
-   background-color: rgba(184, 134, 11, 0.05);
-}
-
-.header .flex .navbar a:hover::after{
-   width: 70%;
-}
-
-.header .flex .navbar a.active{
-   color: var(--main-color);
-   font-weight: 600;
-}
-
-.header .flex .navbar a.active::after{
-   width: 70%;
-}
-
-.header .flex .navbar a i{
-   display: none;
-}
-
-/* Icons */
-.header .flex .icons{
-   display: flex;
-   gap: 1rem;
-   align-items: center;
-   flex-shrink: 0;
-}
-
-.header .flex .icons div{
-   font-size: 2rem;
-   color: var(--main-color);
-   cursor: pointer;
-   height: 4.5rem;
-   width: 4.5rem;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   border: .15rem solid rgba(184, 134, 11, 0.2);
-   background-color: #FFFFFF;
-   border-radius: 50%;
-   transition: var(--transition);
-}
-
 .header .flex .icons div:hover{
    background-color: var(--main-color);
    color: var(--white);
@@ -185,20 +325,10 @@
    box-shadow: 0 .4rem .8rem rgba(184, 134, 11, 0.2);
 }
 
-.header .flex .icons #menu-btn{
-   display: none !important;
-}
-
-#search-btn{
-   display: none;
-}
-
-/* REMOVED: Profile icon - completely hidden */
 #user-btn {
    display: none !important;
 }
 
-/* Profile Dropdown */
 .header .flex .profile{
    position: absolute;
    top: 100%;
@@ -242,203 +372,5 @@
    to {
       opacity: 1;
       transform: translateY(0);
-   }
-}
-
-/* Search Suggestions */
-.search-suggestions{
-   position: absolute;
-   top: 110%;
-   left: 0;
-   right: 0;
-   background: #FFFFFF;
-   border: .15rem solid rgba(184, 134, 11, 0.2);
-   border-radius: 1rem;
-   box-shadow: 0 .5rem 2rem rgba(0,0,0,.1);
-   padding: 1rem 0;
-   display: none;
-   max-height: 35rem;
-   overflow-y: auto;
-   z-index: 100;
-}
-
-.search-suggestions.active{
-   display: block;
-   animation: fadeInDown 0.3s ease;
-}
-
-.search-suggestions .suggestion-section{
-   padding: 1rem 0;
-}
-
-.search-suggestions .suggestion-title{
-   font-size: 1.2rem;
-   color: var(--light-color);
-   padding: 0.5rem 2rem;
-   text-transform: uppercase;
-   font-weight: 600;
-   letter-spacing: .1rem;
-}
-
-.search-suggestions .suggestion-item{
-   padding: 1rem 2rem;
-   font-size: 1.5rem;
-   color: var(--black);
-   cursor: pointer;
-   display: flex;
-   align-items: center;
-   gap: 1rem;
-   transition: var(--transition);
-}
-
-.search-suggestions .suggestion-item:hover{
-   background-color: rgba(184, 134, 11, 0.05);
-   color: var(--main-color);
-}
-
-.search-suggestions .suggestion-item i{
-   color: var(--main-color);
-   font-size: 1.3rem;
-}
-
-.search-suggestions .clear-history{
-   text-align: center;
-   padding: 1rem;
-   font-size: 1.3rem;
-   color: var(--red);
-   cursor: pointer;
-   border-top: .1rem solid rgba(184, 134, 11, 0.1);
-   margin-top: 1rem;
-   transition: var(--transition);
-}
-
-.search-suggestions .clear-history:hover{
-   background-color: var(--pastel-pink);
-}
-
-/* Responsive */
-@media (max-width:1200px){
-   .header .flex{
-      padding: 1.5rem 3rem;
-   }
-   
-   .header .flex .search-form{
-      width: 35rem;
-   }
-}
-
-@media (max-width:991px){
-   .header .flex{
-      padding: 1.5rem 2rem;
-   }
-   
-   .header .flex .navbar{
-      gap: 0.3rem;
-   }
-   
-   .header .flex .navbar a{
-      font-size: 1.5rem;
-      padding: 0.8rem 1.5rem;
-   }
-   
-   .header .flex .search-form{
-      width: 30rem;
-   }
-}
-
-@media (max-width:768px){
-   .header {
-      height: auto; /* Allow expansion on mobile */
-      min-height: 7rem;
-   }
-   
-   #search-btn{
-      display: flex;
-   }
-   
-   .header .flex .icons #menu-btn{
-      display: flex !important;
-   }
-   
-   .header .flex{
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      padding: 1.5rem 2rem;
-   }
-   
-   .header .flex .logo img{
-      height: 4rem;
-   }
-   
-   .header .flex .navbar{
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: #FFFFFF;
-      border-top: .1rem solid rgba(184, 134, 11, 0.15);
-      padding: 2rem;
-      flex-direction: column;
-      gap: 1rem;
-      display: none !important;
-      box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08);
-      z-index: 100;
-   }
-   
-   .header .flex .navbar.active{
-      display: flex !important;
-   }
-   
-   .header .flex .navbar a{
-      width: 100%;
-      text-align: center;
-      padding: 1.2rem 2rem;
-      font-size: 1.6rem;
-   }
-   
-   .header .flex .navbar a:hover{
-      background-color: rgba(184, 134, 11, 0.08);
-   }
-
-   .header .flex .search-form{
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      border-left: none;
-      border-right: none;
-      border-radius: 0;
-      width: 100%;
-      background: #FFFFFF;
-      box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.08);
-      padding: 2rem;
-      clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
-      transition: clip-path .3s ease;
-      z-index: 99;
-      border-top: .1rem solid rgba(184, 134, 11, 0.15);
-   }
-
-   .header .flex .search-form.active{
-      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-   }
-   
-   .header .flex .profile{
-      right: 2rem;
-   }
-}
-
-@media (max-width:450px){
-   .header .flex{
-      padding: 1.2rem 1.5rem;
-   }
-   
-   .header .flex .logo img{
-      height: 3.5rem;
-   }
-   
-   .header .flex .icons div{
-      height: 4rem;
-      width: 4rem;
-      font-size: 1.8rem;
    }
 }
