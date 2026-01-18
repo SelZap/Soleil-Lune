@@ -231,18 +231,21 @@ document.querySelectorAll('.posts-container .box-container .box').forEach(card =
 });
 
 // ==========================================
-// Auto-dismiss Messages
+// Auto-dismiss Messages (FIXED)
 // ==========================================
 
-const messages = document.querySelectorAll('.message');
+const messages = document.querySelectorAll('.message:not(.error-message-auth)');
 messages.forEach(message => {
-    setTimeout(() => {
-        message.style.opacity = '0';
-        message.style.transform = 'translateY(-2rem)';
+    // Only auto-dismiss messages in header, not auth error messages
+    if (!message.classList.contains('error-message-auth')) {
         setTimeout(() => {
-            message.remove();
-        }, 300);
-    }, 5000);
+            message.style.opacity = '0';
+            message.style.transform = 'translateY(-2rem)';
+            setTimeout(() => {
+                message.remove();
+            }, 300);
+        }, 5000);
+    }
 });
 
 // ==========================================
