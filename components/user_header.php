@@ -10,7 +10,6 @@
             <div class="chatbot-avatar">🌙</div>
             <div>
                <h3>Ami</h3>
-               <p>Online • Ready to help!</p>
             </div>
          </div>
          <button class="chatbot-close"><i class="fas fa-times"></i></button>

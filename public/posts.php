@@ -141,7 +141,7 @@ if ($category && $category != 'all') {
 </section>
 
 <div class="footer">
-   <p>&copy; 2025 <span>Soleil|Lune</span> | All Rights Reserved</p>
+   <p>&copy; 2026 <span>Soleil|Lune</span> | All Rights Reserved</p>
 </div>
 
 <script src="/Soleil-Lune/assets/js/script.js"></script>

@@ -1,6 +1,3 @@
-/* ========================================
-   FIXED HEADER - Responsive Updates
-   ======================================== */
 
 .header{
    background: #FFFFFF;
@@ -11,71 +8,70 @@
    z-index: 1000;
    box-shadow: 0 .2rem 1rem rgba(0,0,0,.08);
    border-bottom: .1rem solid rgba(184, 134, 11, 0.15);
-   min-height: 8rem; /* Changed from fixed height to min-height */
+   min-height: 8rem; 
 }
 
 .header .flex{
    display: flex;
    align-items: center;
-   gap: 2rem; /* Reduced from 3rem */
+   gap: 2rem; 
    position: relative;
-   padding: 1.5rem 2rem; /* Reduced horizontal padding */
+   padding: 1.5rem 2rem; 
    max-width: 140rem;
    margin: 0 auto;
    min-height: 8rem;
-   justify-content: space-between; /* Better spacing control */
+   justify-content: space-between;
 }
 
-/* Logo - ensure it stays visible */
 .header .flex .logo{
    flex-shrink: 0;
    display: flex;
    align-items: center;
-   margin-right: 1rem; /* Reduced from 2rem */
+   margin-right: 1rem; 
 }
 
 .header .flex .logo img{
-   height: 4.5rem; /* Slightly reduced for better fit */
+   height: 4.5rem; 
    width: auto;
    filter: drop-shadow(0 .2rem .4rem rgba(184, 134, 11, 0.15));
    transition: var(--transition);
 }
 
-/* Search Form - more compact */
+/* Search Form */
 .header .flex .search-form{
    border: .15rem solid rgba(184, 134, 11, 0.2);
    border-radius: 2.5rem;
    background-color: #FAFAFA;
    display: flex;
    gap: 1rem;
-   padding: 1rem 1.5rem; /* Reduced padding */
+   padding: 1rem 1.5rem; 
    width: 100%;
-   max-width: 35rem; /* Add max-width */
+   max-width: 35rem; 
    position: relative;
-   flex-shrink: 1; /* Allow shrinking */
+   flex-shrink: 1; 
    align-items: center;
    transition: var(--transition);
 }
 
-/* Navigation - compact on medium screens */
+/* Navigation  */
 .header .flex .navbar{
    display: flex !important;
    align-items: center;
-   gap: 0.3rem; /* Reduced gap */
-   flex: 0 1 auto; /* Don't take too much space */
+   gap: 0.3rem; 
+   flex: 0 1 auto; 
    justify-content: center;
    position: static;
    border: none;
    background: none;
    box-shadow: none;
    padding: 0;
-   margin: 0 auto; /* Center the navbar */
+   margin: 0 auto; 
 }
 
 .header .flex .navbar a{
-   font-size: 1.5rem; /* Slightly smaller */
+   font-size: 1.5rem; 
    color: var(--black);
-   padding: 0.8rem 1.2rem; /* More compact */
+   padding: 0.8rem 1.2rem; 
    border-radius: .5rem;
    background-color: transparent;
    transition: var(--transition);
@@ -89,13 +85,13 @@
    white-space: nowrap;
 }
 
-/* Icons - ensure they're visible */
+/* Icons  */
 .header .flex .icons{
    display: flex;
    gap: 1rem;
    align-items: center;
    flex-shrink: 0;
-   margin-left: 0; /* Remove auto margin */
+   margin-left: 0; 
 }
 
 .header .flex .icons div{
@@ -122,7 +118,7 @@
    display: none;
 }
 
-/* Medium screens (991px - 1200px) - CRITICAL FIX */
+/* Medium screens (991px - 1200px) */
 @media (max-width:1200px) and (min-width:769px){
    .header{
       min-height: auto;
