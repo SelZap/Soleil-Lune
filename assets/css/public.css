@@ -1,5 +1,6 @@
 /* ========================================
    PUBLIC PAGES STYLES - Soleil|Lune
+   FIXES: Comment spacing, vendor prefixes
    ======================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
@@ -59,7 +60,7 @@ html{
    font-size: 62.5%;
    overflow-x: hidden;
    scroll-behavior: smooth;
-   scroll-padding-top: 7rem;
+   scroll-padding-top: 9rem;
 }
 
 body{
@@ -483,6 +484,7 @@ section{
    display: -webkit-box;
    -webkit-box-orient: vertical;
    -webkit-line-clamp: 3;
+   line-clamp: 3; /* Standard property */
    max-height: 10.8rem;
    flex-grow: 1;
 }

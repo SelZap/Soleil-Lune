@@ -1,11 +1,10 @@
 <?php
-// Display messages if any
 if (isset($_SESSION['message'])) {
     $type = $_SESSION['message_type'] ?? 'error';
     $message = $_SESSION['message'];
     
     echo '
-    <div class="message" style="position: fixed; top: 8rem; left: 50%; transform: translateX(-50%); z-index: 10000; max-width: 1200px; width: 90%; margin: 0;">
+    <div class="message ' . $type . '" style="position: fixed !important; top: 9rem !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 10000 !important; max-width: 1200px; width: 90%; margin: 0 !important;">
         <span>' . htmlspecialchars($message) . '</span>
         <i class="fas fa-times" onclick="this.parentElement.remove();"></i>
     </div>
@@ -32,7 +31,6 @@ if (isset($_SESSION['message'])) {
          <div id="menu-btn" class="fas fa-bars"></div>
          <div id="search-btn" class="fas fa-search"></div>
          <div id="chatbot-btn" class="fas fa-comments"></div>
-         <div id="user-btn" class="fas fa-user"></div>
       </div>
 
       <nav class="navbar">
@@ -84,7 +82,6 @@ if (isset($_SESSION['message'])) {
          <div class="chatbot-avatar">🌙</div>
          <div>
             <h3>Ami</h3>
-            <p>Online • Ready to help!</p>
          </div>
       </div>
       <button class="chatbot-close"><i class="fas fa-times"></i></button>
